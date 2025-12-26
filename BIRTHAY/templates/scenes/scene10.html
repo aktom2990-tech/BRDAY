@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* Scene 10 - Final Closing Scene */
+.scene-10 {
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    overflow: hidden;
+    position: relative;
+    touch-action: manipulation;
+}
+
+/* Yin-Yang Animation - CLOSING VERSION (FIRST) */
+.yinyang-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    opacity: 1;
+}
+
+/* Perfect circle Yin-Yang */
+.yinyang {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    transform: rotate(0deg) scale(1);
+    box-shadow: 
+        0 0 30px rgba(255, 255, 255, 0.5),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Halves of the Yin-Yang */
+.half {
+    width: 50%;
+    height: 100%;
+    position: relative;
+}
+.half.black { 
+    background: black; 
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+.half.white { 
+    background: white; 
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Dots inside Yin-Yang */
+.dot {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.dot.white { 
+    background: white; 
+    top: 25%; 
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+.dot.black { 
+    background: black; 
+    top: 75%; 
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Rotation + zoom animation - OPPOSITE/CLOSING VERSION */
+@keyframes rotateZoomClose {
+    0% {
+        transform: rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    20% {
+        transform: rotate(-180deg) scale(0.8);
+    }
+    40% {
+        transform: rotate(-360deg) scale(0.6);
+        opacity: 0.9;
+    }
+    60% {
+        transform: rotate(-540deg) scale(0.4);
+        opacity: 0.7;
+    }
+    80% {
+        transform: rotate(-720deg) scale(0.2);
+        opacity: 0.5;
+    }
+    100% {
+        transform: rotate(-900deg) scale(0);
+        opacity: 0;
+    }
+}
+
+.yinyang.animate {
+    animation: rotateZoomClose 4s ease-in-out forwards;
+    border-radius: 50%;
+}
+
+/* Text container - appears AFTER animation */
+.text-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.text-container.visible {
+    opacity: 1;
+}
+
+/* Japanese text */
+.kanji {
+    font-size: 4rem;
+    color: white;
+    margin-bottom: 15px;
+    text-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.8),
+        0 0 40px rgba(255, 255, 255, 0.5);
+    font-family: 'Yu Gothic', 'Hiragino Kaku Gothic Pro', sans-serif;
+}
+
+.romaji {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 10px;
+    font-style: italic;
+    letter-spacing: 2px;
+}
+
+.english {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Georgia', serif;
+    margin-bottom: 40px;
+}
+
+/* Restart Button */
+.restart-btn {
+    padding: 15px 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    backdrop-filter: blur(5px);
+}
+
+.restart-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 1s ease;
+}
+
+.restart-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+}
+
+/* Tap hint for mobile */
+.tap-hint {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.9rem;
+    font-family: 'Courier New', monospace;
+    z-index: 3;
+    opacity: 0;
+    animation: fadeInHint 2s ease 6s forwards;
+}
+
+@keyframes fadeInHint {
+    to { opacity: 1; }
+}
+
+/* Fade out container */
+.fade-out {
+    opacity: 0 !important;
+    transition: opacity 1s ease;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .yinyang-container {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .kanji {
+        font-size: 3.5rem;
+    }
+    
+    .romaji {
+        font-size: 1.3rem;
+    }
+    
+    .english {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+    
+    .restart-btn {
+        padding: 12px 35px;
+        font-size: 1.1rem;
+    }
+    
+    .dot {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .yinyang-container {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .kanji {
+        font-size: 3rem;
+    }
+    
+    .romaji {
+        font-size: 1.1rem;
+    }
+    
+    .english {
+        font-size: 1rem;
+        margin-bottom: 25px;
+    }
+    
+    .restart-btn {
+        padding: 10px 30px;
+        font-size: 1rem;
+    }
+    
+    .dot {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .tap-hint {
+        font-size: 0.8rem;
+        bottom: 20px;
+    }
+}
+</style>
+
+<div class="scene-10" id="scene-container">
+    <!-- Yin-Yang Animation (FIRST) -->
+    <div class="yinyang-container" id="yinyang-container">
+        <div class="yinyang" id="yinyang">
+            <div class="half black"><div class="dot white"></div></div>
+            <div class="half white"><div class="dot black"></div></div>
+        </div>
+    </div>
+    
+    <!-- Text Container (appears AFTER animation) -->
+    <div class="text-container" id="text-container">
+        <div class="kanji">終わり</div>
+        <div class="romaji">owari</div>
+        <div class="english">The End</div>
+        
+        <!-- Restart Button -->
+        <button class="restart-btn" id="restart-btn" onclick="goToHome()">
+            Restart Journey
+        </button>
+    </div>
+    
+    <!-- Mobile hint -->
+    <div class="tap-hint" id="tap-hint">
+        Tap Restart to begin again
+    </div>
+</div>
+
+<script>
+// DOM elements
+const sceneContainer = document.getElementById('scene-container');
+const yinyangContainer = document.getElementById('yinyang-container');
+const yinyang = document.getElementById('yinyang');
+const textContainer = document.getElementById('text-container');
+const restartBtn = document.getElementById('restart-btn');
+const tapHint = document.getElementById('tap-hint');
+
+// Function to go to home page
+function goToHome() {
+    // Add fade out effect
+    sceneContainer.classList.add('fade-out');
+    
+    // Redirect to index.html after fade
+    setTimeout(() => {
+        window.location.href = "/";
+    }, 500);
+}
+
+// Scene sequence
+function initScene() {
+    // Start yin-yang animation immediately
+    setTimeout(() => {
+        yinyang.classList.add('animate');
+        
+        // After animation completes, show text
+        setTimeout(() => {
+            // Hide yin-yang container
+            yinyangContainer.style.opacity = '0';
+            yinyangContainer.style.transition = 'opacity 1s ease';
+            
+            // Show text container with "The End"
+            setTimeout(() => {
+                textContainer.classList.add('visible');
+                
+                // Show restart button after text
+                setTimeout(() => {
+                    restartBtn.classList.add('visible');
+                }, 500);
+            }, 500);
+        }, 4000); // Wait for yin-yang animation to finish
+    }, 500); // Brief delay before starting animation
+}
+
+// Start the scene
+document.addEventListener('DOMContentLoaded', function() {
+    initScene();
+    
+    // Add touch feedback to restart button
+    restartBtn.addEventListener('touchstart', function() {
+        this.style.transform = 'scale(0.95)';
+        this.style.transition = 'transform 0.1s ease';
+    });
+    
+    restartBtn.addEventListener('touchend', function() {
+        this.style.transform = 'scale(1)';
+    });
+    
+    // Also support Enter key for accessibility
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            goToHome();
+        }
+    });
+});
+</script>
+
+{% endblock %}

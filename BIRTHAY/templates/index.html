@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="scene">
+    <div class="content">
+        <div id="character">🙂</div>
+        <div id="dialogue">I am so sorry for this crap site.</div>
+        <button id="nextBtn">Next</button>
+
+        <div id="choices" style="display:none;">
+            <button onclick="choose(1)">It’s okay</button>
+            <button onclick="choose(2)">I know it’s a prank</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>const lines = [
+    "I am so sorry for this crap site.",
+    "I didn’t have enough time.",
+    "N I don’t have the skills to do it.",
+    "And I only managed to do this.",
+    "Well, that's all. Bye."
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+    const dialogue = document.getElementById("dialogue");
+    const nextBtn = document.getElementById("nextBtn");
+    const choices = document.getElementById("choices");
+    const character = document.getElementById("character");
+
+    if (!dialogue || !nextBtn || !choices || !character) return;
+
+    let step = 0;
+    dialogue.textContent = lines[0];
+
+    // Advance dialogue on Next button
+    nextBtn.onclick = () => {
+        step++;
+        if (step < lines.length) {
+            dialogue.textContent = lines[step];
+        } else {
+            nextBtn.style.display = "none";
+            choices.style.display = "block";
+        }
+    };
+
+    // Choice handling
+    window.choose = (n) => {
+        choices.style.display = "none";
+
+        
+        // Optional: brief feedback before hiding
+
+       
+            // Do nothing, just a pause
+        
+        if (n === 1) {
+            dialogue.textContent = "BRUH, HOW LOWLY YOU THINK OF ME";
+            character.textContent = "😔";
+        } else {
+            dialogue.textContent = "HEHE, YOU KNOW ME";
+            character.textContent = "😄";
+        };
+
+        // Hide dialogue and character before animation
+        setTimeout(() => {
+            dialogue.style.display = "none";
+            character.style.display = "none";
+
+            // Create Yin-Yang container
+            const yyContainer = document.createElement("div");
+            yyContainer.className = "yinyang-container";
+            yyContainer.innerHTML = `
+                <div class="yinyang">
+                    <div class="half black"><div class="dot white"></div></div>
+                    <div class="half white"><div class="dot black"></div></div>
+                </div>
+            `;
+            document.body.appendChild(yyContainer);
+
+            const yy = yyContainer.querySelector(".yinyang");
+
+            // Step 1: show static circle for 0.5s
+            setTimeout(() => {
+                // Step 2: trigger rotate + zoom animation
+                yy.classList.add("animate");
+            }, 1000);
+
+            // Step 3: after animation ends, remove Yin-Yang and apply split background
+            setTimeout(() => {
+                yyContainer.remove();
+                document.body.style.background = "linear-gradient(90deg, white 50%, black 50%)";
+            }, 3500); // 0.5s + 6s animation
+        }, 2000);
+        setTimeout(() => {
+    window.location.href = "/scene/1";
+}, 5700);
+ // wait 2s after choice feedback
+    };
+});
+
+</script>
+{% endblock %}

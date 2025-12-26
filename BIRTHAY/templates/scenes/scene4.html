@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.scene-4 {
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+}
+
+.character-container {
+    width: 250px;
+    height: 250px;
+    margin-bottom: 20px;
+}
+
+.character-gif {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.chat {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    max-width: 90%;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    text-align: center;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 90%;
+    max-width: 300px;
+}
+
+.option-btn {
+    padding: 12px;
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.option-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+}
+
+.option-1 {
+    color: #ff4444;
+    border-color: #ff4444;
+}
+
+.option-2 {
+    color: #44ff44;
+    border-color: #44ff44;
+}
+
+.next-btn {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background: white;
+    border: 2px solid #4444ff;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #4444ff;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.next-btn:hover {
+    background: #4444ff;
+    color: white;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Simple fade animation */
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+</style>
+
+<div class="scene-4">
+    <div class="character-container">
+        <img src="{{ url_for('static', filename='gifs/yappingcat.gif') }}" 
+             class="character-gif" 
+             id="character">
+    </div>
+    
+    <div class="chat fade-in" id="chat">
+        Hey, it's me, again.
+    </div>
+    
+    <div class="options hidden" id="options">
+        <div style="color: white; margin-bottom: 15px; font-size: 1.2rem;">
+            Are you alive?
+        </div>
+        <button class="option-btn option-1" onclick="choose('no')">
+            😵 no bro am dead
+        </button>
+        <button class="option-btn option-2" onclick="choose('yes')">
+            ✅ ofc
+        </button>
+    </div>
+    
+    <button class="next-btn hidden" id="next" onclick="nextScene()">
+        NEXT →
+    </button>
+</div>
+
+<script>
+const dialogues = [
+    {
+        text: "Hey, it's me, again.\nYup I know this is 2nd time I have done this.\nReason I didn't receive enough appreciation.🥲",
+        gif: "yappingcat.gif",
+        duration: 7000
+    },
+    {
+        text: "Well, yup I guess this is more to ur liking",
+        gif: "cryingcat.gif",
+        duration: 5000
+    },
+    {
+        text: "I tried to be more innovative\nSo yeah now we move on to",
+        gif: "yappingcat2.gif",
+        duration: 6000
+    },
+    {
+    text: "CHOICES!!!",
+        gif: "party.gif",
+        duration: 4000
+    },
+    {
+        text: "Well, the doesnt choices matter (lol) \nStill Choose wisely and yeah\nactually choose what u want",
+        gif: "yappingcat.gif",
+        duration: 7000
+    },
+    {
+        text: "Hehe\nhahahahahahahaha",
+        gif: "laugh.gif",
+        duration: 4000
+    },
+    {
+        text: "Okay now lets move on\nOkay lets start by basic question",
+        gif: "yappingcat.gif",
+        duration: 6000
+    }
+];
+
+let current = 0;
+const chat = document.getElementById('chat');
+const character = document.getElementById('character');
+const options = document.getElementById('options');
+const nextBtn = document.getElementById('next');
+
+function showNext() {
+    if (current < dialogues.length) {
+        const dialogue = dialogues[current];
+        chat.textContent = dialogue.text;
+        chat.classList.remove('fade-in');
+        void chat.offsetWidth;
+        chat.classList.add('fade-in');
+        
+        character.src = `{{ url_for('static', filename='gifs/') }}${dialogue.gif}`;
+        
+        current++;
+        
+        if (current < dialogues.length) {
+            setTimeout(showNext, dialogue.duration);
+        } else {
+            setTimeout(() => {
+                chat.classList.add('hidden');
+                options.classList.remove('hidden');
+                options.classList.add('fade-in');
+            }, 4000);
+        }
+    }
+}
+
+function choose(choice) {
+    if (choice === 'no') {
+        alert("I think you're dumb.\nGo back and choose again.");
+    } else if (choice === 'yes') {
+        options.classList.remove('fade-in');
+        options.classList.add('hidden');
+        chat.textContent = "hash, dhanna boksi haina raixha, jk";
+        character.src = "{{ url_for('static', filename='gifs/boksi.gif') }}";
+        chat.classList.remove('hidden');
+        chat.classList.add('fade-in');
+        
+        setTimeout(() => {
+            nextBtn.classList.remove('hidden');
+            nextBtn.classList.add('fade-in');
+        }, 4000);
+    }
+}
+
+function nextScene() {
+    window.location.href = "/scene/5";
+}
+
+setTimeout(showNext, 1000);
+</script>
+
+{% endblock %}

@@ -1,0 +1,989 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* Scene 7 - Black background with immediate thread transition */
+.scene-7 {
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Georgia', serif;
+}
+
+/* Middle red thread (from Scene 6) - starts full height */
+.middle-thread {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 100vh;
+    border-radius: 4px;
+    background: linear-gradient(to bottom, #FF0000, #FF4500, #FF0000);
+    box-shadow: 
+        0 0 20px rgba(255, 0, 0, 0.8),
+        0 0 40px rgba(255, 69, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+/* Thread texture effect */
+.middle-thread::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 3px,
+        rgba(255, 255, 255, 0.2) 3px,
+        rgba(255, 255, 255, 0.2) 6px
+    );
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+/* IMMEDIATE TRANSITION: Thread expands to border with 0.5s pause first */
+@keyframes expandToBorderImmediate {
+    0%, 25% { /* Stay as middle thread for 25% of animation (0.5s) */
+        width: 10px;
+        height: 100vh;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 4px;
+        background: linear-gradient(to bottom, #FF0000, #FF4500, #FF0000);
+        opacity: 1;
+    }
+    30% { /* Start expanding */
+        width: 10px;
+        height: 100vh;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    40% {
+        width: 30vw;
+        height: 100vh;
+        left: 35%;
+        transform: translateX(0);
+    }
+    50% {
+        width: 60vw;
+        height: 100vh;
+        left: 20%;
+    }
+    60% {
+        width: 100vw;
+        height: 100vh;
+        left: 0;
+        transform: none;
+    }
+    70% {
+        width: 100vw;
+        height: 8px;
+        top: 0;
+        left: 0;
+        border-radius: 0;
+        background: linear-gradient(90deg, #FF0000, #FF4500, #FF0000);
+    }
+    80%, 100% {
+        width: 100%;
+        height: 8px;
+        top: 0;
+        left: 0;
+        opacity: 0;
+    }
+}
+
+/* After expansion, transform into all four borders */
+@keyframes createBorders {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Final border state */
+.thread-border {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* Top border */
+.thread-border-top {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #FF0000, #FF4500, #FF0000);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Bottom border */
+.thread-border-bottom {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #FF0000, #FF4500, #FF0000);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Left border */
+.thread-border-left {
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 100%;
+    background: linear-gradient(to bottom, #FF0000, #FF4500, #FF0000);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Right border */
+.thread-border-right {
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    background: linear-gradient(to bottom, #FF0000, #FF4500, #FF0000);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Show borders */
+.thread-border.visible {
+    opacity: 1;
+    animation: borderPulse 2s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+    0%, 100% {
+        opacity: 0.9;
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.2);
+    }
+}
+
+/* Initial message container */
+.message-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 1s ease;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 40px;
+    border-radius: 15px;
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+}
+
+.message-container.visible {
+    opacity: 1;
+}
+
+/* Birthday message */
+.birthday-message {
+    color: white;
+    font-size: 1.8rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 1s ease;
+}
+
+.birthday-message.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Emphasized text */
+.emphasized {
+    color: #ff4444;
+    font-weight: bold;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+}
+
+/* Options container */
+.options-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.options-container.visible {
+    opacity: 1;
+}
+
+.option-btn {
+    padding: 15px 30px;
+    background: linear-gradient(45deg, rgba(255, 0, 0, 0.2), rgba(255, 69, 0, 0.3));
+    border: 2px solid rgba(255, 0, 0, 0.5);
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-width: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.option-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.option-btn:hover::before {
+    left: 100%;
+}
+
+.option-btn:hover {
+    background: linear-gradient(45deg, rgba(255, 0, 0, 0.3), rgba(255, 69, 0, 0.4));
+    border-color: rgba(255, 0, 0, 0.8);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+}
+
+/* Response messages */
+.response-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.85);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 600px;
+    width: 90%;
+    z-index: 4;
+    opacity: 0;
+    transition: opacity 1s ease;
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    color: white;
+    font-size: 1.4rem;
+    line-height: 1.6;
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+}
+
+.response-message.visible {
+    opacity: 1;
+}
+
+/* Image container */
+.image-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85vw;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.image-container.visible {
+    opacity: 1;
+}
+
+/* Images with perfect fit */
+.fit-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+.knight-image {
+    animation: floatImage 4s ease-in-out infinite;
+}
+
+@keyframes floatImage {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.krishna-image {
+    animation: krishnaGlow 3s ease-in-out infinite;
+}
+
+@keyframes krishnaGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.5)) brightness(1);
+    }
+    50% {
+        filter: drop-shadow(0 0 40px rgba(212, 175, 55, 0.8)) brightness(1.1);
+    }
+}
+
+/* Story container */
+.story-container {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    z-index: 6;
+    opacity: 0;
+    transition: opacity 1s ease;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 30px;
+    border-radius: 15px;
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.2);
+}
+
+.story-container.visible {
+    opacity: 1;
+}
+
+/* Story paragraph */
+.story-paragraph {
+    color: white;
+    font-size: 1.3rem;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 1s ease;
+}
+
+.story-paragraph.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Golden text */
+.golden-text {
+    color: transparent;
+    background: linear-gradient(45deg, #D4AF37, #FFD700, #D4AF37);
+    -webkit-background-clip: text;
+    background-clip: text;
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+/* Blue text for Krishna */
+.blue-text {
+    color: #87CEEB;
+    text-shadow: 0 0 10px rgba(135, 206, 235, 0.3);
+}
+
+/* Next paragraph button */
+.next-paragraph-btn {
+    padding: 12px 30px;
+    background: linear-gradient(45deg, #FF0000, #FF4500);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    opacity: 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+.next-paragraph-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: 0.5s;
+}
+
+.next-paragraph-btn:hover::before {
+    left: 100%;
+}
+
+.next-paragraph-btn.visible {
+    opacity: 1;
+}
+
+.next-paragraph-btn:hover {
+    background: linear-gradient(45deg, #FF4500, #FF0000);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(255, 0, 0, 0.7);
+}
+
+/* Final continue button */
+.continue-btn {
+    padding: 15px 40px;
+    background: linear-gradient(45deg, #FF0000, #FF4500, #FF0000);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-top: 30px;
+    opacity: 0;
+    position: relative;
+    overflow: hidden;
+    z-index: 8;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+.continue-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: 0.5s;
+}
+
+.continue-btn:hover::before {
+    left: 100%;
+}
+
+.continue-btn.visible {
+    opacity: 1;
+}
+
+.continue-btn:hover {
+    background: linear-gradient(45deg, #FF4500, #FF0000, #FF4500);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 25px rgba(255, 0, 0, 0.8);
+}
+
+/* Fade effects */
+.fade-out {
+    opacity: 0 !important;
+    transition: opacity 1s ease;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .birthday-message,
+    .response-message,
+    .story-paragraph {
+        font-size: 1.2rem;
+    }
+    
+    .image-container {
+        height: 60vh;
+        width: 90vw;
+    }
+    
+    .story-container {
+        width: 95%;
+        padding: 20px;
+        bottom: 60px;
+    }
+    
+    .option-btn,
+    .next-paragraph-btn,
+    .continue-btn {
+        padding: 12px 25px;
+        font-size: 1.1rem;
+        min-width: 150px;
+    }
+    
+    .options-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .birthday-message,
+    .response-message,
+    .story-paragraph {
+        font-size: 1.1rem;
+    }
+    
+    .image-container {
+        height: 50vh;
+    }
+    
+    .story-container {
+        padding: 15px;
+        bottom: 50px;
+    }
+    
+    .option-btn,
+    .next-paragraph-btn,
+    .continue-btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+        width: 90%;
+        max-width: 250px;
+    }
+}
+</style>
+
+<div class="scene-7" id="scene-container">
+    <!-- Middle red thread (from Scene 6) -->
+    <div class="middle-thread" id="middle-thread"></div>
+    
+    <!-- Red thread borders (hidden initially) -->
+    <div class="thread-border thread-border-top hidden" id="border-top"></div>
+    <div class="thread-border thread-border-bottom hidden" id="border-bottom"></div>
+    <div class="thread-border thread-border-left hidden" id="border-left"></div>
+    <div class="thread-border thread-border-right hidden" id="border-right"></div>
+    
+    <!-- Initial birthday message -->
+    <div class="message-container hidden" id="message-container">
+        <div class="birthday-message hidden" id="birthday-message-1">
+            HAPPY BIRTHDAY !!!<br> I wish I could give something more
+        </div>
+        <div class="birthday-message hidden" id="birthday-message-2">
+            I would if I didn't promise... <br><span class="emphasized">if you remember what</span>
+        </div>
+        
+        <div class="options-container hidden" id="options-container">
+            <button class="option-btn" id="option-yes" onclick="chooseOption('yes')">
+                ✓ yes, i do
+            </button>
+            <button class="option-btn" id="option-no" onclick="chooseOption('no')">
+                ✗ ofc i know u won't remember
+            </button>
+        </div>
+    </div>
+    
+    <!-- Response message for "yes" -->
+    <div class="response-message hidden" id="response-yes">
+        <div class="golden-text">wow never thought u would remember</div>
+    </div>
+    
+    <!-- Response message for "no" -->
+    <div class="response-message hidden" id="response-no">
+        <div class="golden-text">"I or u won't buy stuffs, until we earn"</div>
+        <div style="margin-top: 15px;">well but i made this myself</div>
+        <div style="margin-top: 10px; font-style: italic;">so am not breaking promise 'wink wink'</div>
+    </div>
+    
+    <!-- Knight image container -->
+    <div class="image-container hidden" id="knight-container">
+        <img src="{{ url_for('static', filename='images/knight.png') }}" 
+             class="fit-image knight-image" 
+             id="knight-image"
+             alt="Knight and Maiden"
+             onerror="handleImageError('knight')">
+    </div>
+    
+    <!-- Knight story container -->
+    <div class="story-container hidden" id="knight-story-container">
+        <div class="story-paragraph hidden" id="knight-paragraph-1">
+            The knight marches across the ground ,heavy with duty,
+            each step a burden maiden had already passed.
+        </div>
+        <div class="story-paragraph hidden" id="knight-paragraph-2">
+            The maiden waits seated, eyes fixed on the horizon,
+            her hands in a fist , heart heavy with worry and uncertainty.
+        </div>
+        <div class="story-paragraph hidden" id="knight-paragraph-3">
+            Threads of fate bind them, fragile against the cruelty of the world,
+            letters and signs their only connection across the distance.
+        </div>
+        <div class="story-paragraph hidden" id="knight-paragraph-4">
+            Agony hangs in silence, unspoken yet sharp,
+            and still they endure, each trapped in their own relentless trial.
+        </div>
+        
+        <button class="next-paragraph-btn hidden" id="knight-next-btn" onclick="nextParagraph('knight')">
+            Next →
+        </button>
+    </div>
+    
+    <!-- Krishna image container -->
+    <div class="image-container hidden" id="krishna-container">
+        <img src="{{ url_for('static', filename='images/krishna.png') }}" 
+             class="fit-image krishna-image" 
+             id="krishna-image"
+             alt="Lord Krishna"
+             onerror="handleImageError('krishna')">
+    </div>
+    
+    <!-- Krishna story container -->
+    <div class="story-container hidden" id="krishna-story-container">
+        <div class="story-paragraph hidden" id="krishna-paragraph-1">
+            <span class="blue-text">Devotee of Madhura Mohana,</span><br>
+            He never strayed, never left her side.
+        </div>
+        <div class="story-paragraph hidden" id="krishna-paragraph-2">
+            <span class="blue-text">Rama turned away for the world's decree,</span><br>
+            Though pain tore his chest silently.
+        </div>
+        <div class="story-paragraph hidden" id="krishna-paragraph-3">
+            <span class="blue-text">When Kanha's flute slipped from his hand,</span><br>
+            She reached—faith trembling, yet firm she stand.
+        </div>
+        <div class="story-paragraph hidden" id="krishna-paragraph-4">
+            <span class="blue-text">He fell to stillness, breath withdrawn,</span><br>
+            The flute kept praying, devotion drawn.
+        </div>
+        <div class="story-paragraph hidden" id="krishna-paragraph-5">
+            <div class="golden-text" style="font-size: 1.5rem;">
+                Two souls bound neither break or bend,<br>
+                Not abandoned , even lost , found in transcend.
+            </div>
+        </div>
+        
+        <button class="next-paragraph-btn hidden" id="krishna-next-btn" onclick="nextParagraph('krishna')">
+            Next →
+        </button>
+        
+        <button class="continue-btn hidden" id="continue-btn" onclick="nextScene()">
+            NEXT=>
+        </button>
+    </div>
+</div>
+<script>
+// DOM elements
+const sceneContainer = document.getElementById('scene-container');
+const middleThread = document.getElementById('middle-thread');
+const borderTop = document.getElementById('border-top');
+const borderBottom = document.getElementById('border-bottom');
+const borderLeft = document.getElementById('border-left');
+const borderRight = document.getElementById('border-right');
+const messageContainer = document.getElementById('message-container');
+const birthdayMessage1 = document.getElementById('birthday-message-1');
+const birthdayMessage2 = document.getElementById('birthday-message-2');
+const optionsContainer = document.getElementById('options-container');
+const responseYes = document.getElementById('response-yes');
+const responseNo = document.getElementById('response-no');
+const knightContainer = document.getElementById('knight-container');
+const knightImage = document.getElementById('knight-image');
+const knightStoryContainer = document.getElementById('knight-story-container');
+const krishnaContainer = document.getElementById('krishna-container');
+const krishnaImage = document.getElementById('krishna-image');
+const krishnaStoryContainer = document.getElementById('krishna-story-container');
+const continueBtn = document.getElementById('continue-btn');
+
+// Paragraph tracking
+let currentKnightParagraph = 0;
+let currentKrishnaParagraph = 0;
+const totalKnightParagraphs = 4;
+const totalKrishnaParagraphs = 5;
+
+// Image error handling
+function handleImageError(type) {
+    const fallbackText = type === 'knight' ? '⚔️👸' : '🕉️🎶';
+    const fallbackLabel = type === 'knight' ? 'Knight & Maiden' : 'Lord Krishna';
+    const container = type === 'knight' ? knightContainer : krishnaContainer;
+    
+    if (container) {
+        container.innerHTML = `
+            <div style="
+                font-size: 4rem;
+                color: ${type === 'knight' ? '#D4AF37' : '#FFD700'};
+                text-align: center;
+                text-shadow: 0 0 20px rgba(0,0,0,0.5);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+            ">
+                ${fallbackText}<br>
+                <span style="font-size: 1.5rem; display: block; margin-top: 10px;">
+                    ${fallbackLabel}
+                </span>
+            </div>
+        `;
+    }
+}
+
+// IMMEDIATE TRANSITION - Starts as soon as scene loads
+function initScene() {
+    // First, show the middle thread for 0.5 seconds
+    middleThread.style.opacity = '1';
+    
+    // After 0.5 seconds, start the transition animation
+    setTimeout(() => {
+        middleThread.style.animation = 'expandToBorderImmediate 2s ease-out forwards';
+        
+        // After animation completes, create all four borders
+        setTimeout(() => {
+            // Hide the middle thread
+            middleThread.style.display = 'none';
+            
+            // Show all four borders with staggered timing for visual effect
+            setTimeout(() => {
+                borderTop.classList.remove('hidden');
+                borderTop.classList.add('visible');
+            }, 100);
+            
+            setTimeout(() => {
+                borderBottom.classList.remove('hidden');
+                borderBottom.classList.add('visible');
+            }, 200);
+            
+            setTimeout(() => {
+                borderLeft.classList.remove('hidden');
+                borderLeft.classList.add('visible');
+            }, 300);
+            
+            setTimeout(() => {
+                borderRight.classList.remove('hidden');
+                borderRight.classList.add('visible');
+                
+                // After borders are visible, show the message container
+                setTimeout(() => {
+                    showMessageContainer();
+                }, 500);
+            }, 400);
+        }, 2000); // Match the animation duration
+    }, 500); // Wait 0.5 seconds before starting animation
+}
+
+// Show message container after transition
+function showMessageContainer() {
+    messageContainer.classList.remove('hidden');
+    setTimeout(() => {
+        messageContainer.classList.add('visible');
+        
+        setTimeout(() => {
+            birthdayMessage1.classList.remove('hidden');
+            birthdayMessage1.classList.add('visible');
+            
+            setTimeout(() => {
+                birthdayMessage2.classList.remove('hidden');
+                birthdayMessage2.classList.add('visible');
+                
+                setTimeout(() => {
+                    optionsContainer.classList.remove('hidden');
+                    optionsContainer.classList.add('visible');
+                }, 800);
+            }, 800);
+        }, 800);
+    }, 500);
+}
+
+// Handle option selection
+function chooseOption(option) {
+    optionsContainer.classList.remove('visible');
+    optionsContainer.classList.add('fade-out');
+    birthdayMessage1.classList.remove('visible');
+    birthdayMessage1.classList.add('fade-out');
+    birthdayMessage2.classList.remove('visible');
+    birthdayMessage2.classList.add('fade-out');
+    
+    setTimeout(() => {
+        messageContainer.classList.remove('visible');
+        messageContainer.classList.add('fade-out');
+        
+        const responseElement = option === 'yes' ? responseYes : responseNo;
+        responseElement.classList.remove('hidden');
+        
+        setTimeout(() => {
+            responseElement.classList.add('visible');
+            
+            setTimeout(() => {
+                showKnightScene(option);
+            }, 3000);
+        }, 500);
+    }, 500);
+}
+
+// Show knight scene
+function showKnightScene(option) {
+    const responseElement = option === 'yes' ? responseYes : responseNo;
+    responseElement.classList.remove('visible');
+    responseElement.classList.add('fade-out');
+    
+    setTimeout(() => {
+        knightContainer.classList.remove('hidden');
+        knightContainer.classList.add('visible');
+        
+        setTimeout(() => {
+            knightStoryContainer.classList.remove('hidden');
+            knightStoryContainer.classList.add('visible');
+            
+            // Show first paragraph
+            currentKnightParagraph = 1;
+            showParagraph('knight', 1);
+        }, 500);
+    }, 500);
+}
+
+// Show a specific paragraph
+function showParagraph(type, paragraphNum) {
+    const paragraph = document.getElementById(`${type}-paragraph-${paragraphNum}`);
+    const nextBtn = document.getElementById(`${type}-next-btn`);
+    
+    if (paragraph) {
+        paragraph.classList.remove('hidden');
+        paragraph.classList.remove('fade-out');
+        setTimeout(() => {
+            paragraph.classList.add('visible');
+            
+            // Show next button
+            if (nextBtn) {
+                nextBtn.classList.remove('hidden');
+                nextBtn.classList.remove('fade-out');
+                setTimeout(() => {
+                    nextBtn.classList.add('visible');
+                }, 100);
+            }
+        }, 100);
+    }
+}
+
+// Show next paragraph
+function nextParagraph(type) {
+    if (type === 'knight') {
+        // Hide current paragraph
+        const currentPara = document.getElementById(`${type}-paragraph-${currentKnightParagraph}`);
+        const nextBtn = document.getElementById(`${type}-next-btn`);
+        
+        if (currentPara) {
+            currentPara.classList.remove('visible');
+            currentPara.classList.add('fade-out');
+        }
+        
+        // Move to next paragraph
+        currentKnightParagraph++;
+        
+        if (currentKnightParagraph <= totalKnightParagraphs) {
+            setTimeout(() => {
+                // Show new paragraph
+                showParagraph(type, currentKnightParagraph);
+            }, 500);
+        } else {
+            // All knight paragraphs shown, fade to Krishna
+            if (nextBtn) {
+                nextBtn.classList.remove('visible');
+                nextBtn.classList.add('fade-out');
+            }
+            setTimeout(() => {
+                fadeToKrishna();
+            }, 500);
+        }
+    } else if (type === 'krishna') {
+        // Hide current paragraph
+        const currentPara = document.getElementById(`${type}-paragraph-${currentKrishnaParagraph}`);
+        const nextBtn = document.getElementById(`${type}-next-btn`);
+        
+        if (currentPara) {
+            currentPara.classList.remove('visible');
+            currentPara.classList.add('fade-out');
+        }
+        
+        // Move to next paragraph
+        currentKrishnaParagraph++;
+        
+        if (currentKrishnaParagraph <= totalKrishnaParagraphs) {
+            setTimeout(() => {
+                // Show new paragraph
+                showParagraph(type, currentKrishnaParagraph);
+            }, 500);
+        } else {
+            // All krishna paragraphs shown, show continue button
+            if (nextBtn) {
+                nextBtn.classList.remove('visible');
+                nextBtn.classList.add('fade-out');
+            }
+            setTimeout(() => {
+                if (nextBtn) nextBtn.style.display = 'none';
+                continueBtn.classList.remove('hidden');
+                setTimeout(() => {
+                    continueBtn.classList.add('visible');
+                }, 100);
+            }, 500);
+        }
+    }
+}
+
+// Fade to Krishna
+function fadeToKrishna() {
+    knightContainer.classList.remove('visible');
+    knightContainer.classList.add('fade-out');
+    knightStoryContainer.classList.remove('visible');
+    knightStoryContainer.classList.add('fade-out');
+    
+    setTimeout(() => {
+        knightContainer.classList.add('hidden');
+        knightStoryContainer.classList.add('hidden');
+        
+        krishnaContainer.classList.remove('hidden');
+        krishnaContainer.classList.add('visible');
+        
+        setTimeout(() => {
+            krishnaStoryContainer.classList.remove('hidden');
+            krishnaStoryContainer.classList.add('visible');
+            
+            // Show first paragraph
+            currentKrishnaParagraph = 1;
+            showParagraph('krishna', 1);
+        }, 500);
+    }, 500);
+}
+
+// Next scene function
+function nextScene() {
+    window.location.href = "/scene/8";
+}
+
+// Start the scene
+document.addEventListener('DOMContentLoaded', function() {
+    // Start immediate transition
+    initScene();
+    
+    // Set up image error handlers
+    if (knightImage) knightImage.onerror = function() { handleImageError('knight'); };
+    if (krishnaImage) krishnaImage.onerror = function() { handleImageError('krishna'); };
+});
+</script>
+
+{% endblock %}

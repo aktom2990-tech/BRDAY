@@ -1,0 +1,922 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* Scene 8 - Dark background with red borders */
+.scene-8 {
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Georgia', serif;
+}
+
+/* Initial state of borders (from previous scene) */
+.thread-border {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 1;
+}
+
+/* Top border - starts full width at top */
+.thread-border-top {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #FF0000, #FF4500, #FF0000);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Bottom border - starts full width at bottom */
+.thread-border-bottom {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #FF0000, #FF4500, #FF0000);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Left border - starts full height at left */
+.thread-border-left {
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 100%;
+    background: linear-gradient(to bottom, #FF0000, #FF4500, #FF0000);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Right border - starts full height at right */
+.thread-border-right {
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    background: linear-gradient(to bottom, #FF0000, #FF4500, #FF0000);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* White gift box */
+.gift-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 300px;
+    height: 300px;
+    background: white;
+    border-radius: 15px;
+    z-index: 2;
+    opacity: 0;
+    box-shadow: 
+        inset 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+.gift-box.visible {
+    animation: boxAppear 1s ease forwards;
+}
+
+@keyframes boxAppear {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Gift wrapping animation - borders move towards box */
+@keyframes wrapTop {
+    0% {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 8px;
+    }
+    100% {
+        top: calc(50% - 150px - 4px);
+        left: calc(50% - 150px);
+        width: 300px;
+        height: 8px;
+    }
+}
+
+@keyframes wrapBottom {
+    0% {
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 8px;
+    }
+    100% {
+        bottom: calc(50% - 150px - 4px);
+        left: calc(50% - 150px);
+        width: 300px;
+        height: 8px;
+    }
+}
+
+@keyframes wrapLeft {
+    0% {
+        top: 0;
+        left: 0;
+        width: 8px;
+        height: 100%;
+    }
+    100% {
+        top: calc(50% - 150px);
+        left: calc(50% - 150px - 4px);
+        width: 8px;
+        height: 300px;
+    }
+}
+
+@keyframes wrapRight {
+    0% {
+        top: 0;
+        right: 0;
+        width: 8px;
+        height: 100%;
+    }
+    100% {
+        top: calc(50% - 150px);
+        right: calc(50% - 150px - 4px);
+        width: 8px;
+        height: 300px;
+    }
+}
+
+/* Wrapped gift state */
+.gift-wrapped {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #FF0000, #FF4500, #FF0000);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+    animation: borderPulse 2s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+    0%, 100% {
+        opacity: 0.9;
+        filter: brightness(1);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.2);
+    }
+}
+
+/* Gift ribbon (appears after wrapping) */
+.gift-ribbon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 320px;
+    height: 20px;
+    background: linear-gradient(90deg, #FF0000, #FF4500, #FF0000);
+    transform: translate(-50%, -50%);
+    border-radius: 5px;
+    z-index: 4;
+    opacity: 0;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+.gift-ribbon.vertical {
+    width: 20px;
+    height: 320px;
+    background: linear-gradient(to bottom, #FF0000, #FF4500, #FF0000);
+}
+
+.gift-ribbon.visible {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+/* Gift bow */
+.gift-bow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #FF0000, #FF4500);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 5;
+    opacity: 0;
+    box-shadow: 
+        0 0 30px rgba(255, 0, 0, 0.8),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+    animation: bowGlow 2s ease-in-out infinite;
+}
+
+@keyframes bowGlow {
+    0%, 100% {
+        box-shadow: 
+            0 0 30px rgba(255, 0, 0, 0.8),
+            inset 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 0 50px rgba(255, 0, 0, 1),
+            inset 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+}
+
+.gift-bow::before,
+.gift-bow::after {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 40px;
+    background: linear-gradient(45deg, #FF0000, #FF4500);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+}
+
+.gift-bow::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.gift-bow::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.gift-bow.visible {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+/* Text containers */
+.text-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 6;
+    opacity: 0;
+    width: 90%;
+    max-width: 800px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 30px;
+    border-radius: 15px;
+    border: 2px solid rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+    transition: opacity 1s ease;
+}
+
+.text-container.visible {
+    opacity: 1;
+}
+
+/* Text styles */
+.main-text {
+    color: white;
+    font-size: 1.6rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 1s ease;
+}
+
+.main-text.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.emphasized-text {
+    color: #ff4444;
+    font-weight: bold;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+}
+
+/* Screenshot container */
+
+.screenshot-container.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.screenshot-container::before {
+    content: '📱 SCREENSHOT';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: bold;
+    opacity: 0.7;
+}
+
+.screenshot-image {
+    width: 90%;
+    height: auto;
+    max-height: 80%;
+    object-fit: contain;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.screenshot-text {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    color: #333;
+    text-align: center;
+    padding: 0 20px;
+    font-style: italic;
+}
+
+/* Next button */
+/* Fix next button position */
+/* Next button - FIXED VERSION */
+.next-btn {
+    position: fixed;  /* Changed from absolute to fixed */
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 40px;
+    background: linear-gradient(45deg, #FF0000, #FF4500, #FF0000);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    opacity: 0;
+    z-index: 1000; /* Very high z-index to ensure it's on top */
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+/* Remove the duplicate position: relative */
+.next-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: 0.5s;
+}
+
+/* Reduce screenshot container height so button can be seen */
+.screenshot-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    width: 90%;
+    max-width: 600px;
+    height: 50vh; /* Reduced from 70vh to 50vh */
+    background: white;
+    border-radius: 10px;
+    z-index: 7;
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 
+        0 0 50px rgba(255, 255, 255, 0.5),
+        0 0 100px rgba(255, 0, 0, 0.5);
+    border: 3px solid rgba(255, 0, 0, 0.5);
+    transition: all 1s ease;
+}
+
+.next-btn:hover::before {
+    left: 100%;
+}
+
+.next-btn.visible {
+    opacity: 1;
+}
+
+.next-btn:hover {
+    background: linear-gradient(45deg, #FF4500, #FF0000, #FF4500);
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 5px 25px rgba(255, 0, 0, 0.8);
+}
+
+/* Fade effects */
+.fade-out {
+    opacity: 0 !important;
+    transition: opacity 1s ease;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .main-text {
+        font-size: 1.3rem;
+    }
+    
+    .gift-box {
+        width: 250px;
+        height: 250px;
+    }
+    
+    @keyframes wrapTop {
+        0% {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+        }
+        100% {
+            top: calc(50% - 125px - 4px);
+            left: calc(50% - 125px);
+            width: 250px;
+            height: 8px;
+        }
+    }
+    
+    @keyframes wrapBottom {
+        0% {
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+        }
+        100% {
+            bottom: calc(50% - 125px - 4px);
+            left: calc(50% - 125px);
+            width: 250px;
+            height: 8px;
+        }
+    }
+    
+    @keyframes wrapLeft {
+        0% {
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 100%;
+        }
+        100% {
+            top: calc(50% - 125px);
+            left: calc(50% - 125px - 4px);
+            width: 8px;
+            height: 250px;
+        }
+    }
+    
+    @keyframes wrapRight {
+        0% {
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 100%;
+        }
+        100% {
+            top: calc(50% - 125px);
+            right: calc(50% - 125px - 4px);
+            width: 8px;
+            height: 250px;
+        }
+    }
+    
+    .gift-ribbon {
+        width: 270px;
+    }
+    
+    .gift-ribbon.vertical {
+        height: 270px;
+    }
+    
+    .screenshot-container {
+        width: 95%;
+        height: 35vh;
+    }
+    
+    .next-btn {
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        bottom: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-text {
+        font-size: 1.1rem;
+    }
+    
+    .gift-box {
+        width: 200px;
+        height: 200px;
+    }
+    
+    @keyframes wrapTop {
+        0% {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+        }
+        100% {
+            top: calc(50% - 100px - 4px);
+            left: calc(50% - 100px);
+            width: 200px;
+            height: 8px;
+        }
+    }
+    
+    @keyframes wrapBottom {
+        0% {
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+        }
+        100% {
+            bottom: calc(50% - 100px - 4px);
+            left: calc(50% - 100px);
+            width: 200px;
+            height: 8px;
+        }
+    }
+    
+    @keyframes wrapLeft {
+        0% {
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 100%;
+        }
+        100% {
+            top: calc(50% - 100px);
+            left: calc(50% - 100px - 4px);
+            width: 8px;
+            height: 200px;
+        }
+    }
+    
+    @keyframes wrapRight {
+        0% {
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 100%;
+        }
+        100% {
+            top: calc(50% - 100px);
+            right: calc(50% - 100px - 4px);
+            width: 8px;
+            height: 200px;
+        }
+    }
+    
+    .gift-ribbon {
+        width: 220px;
+    }
+    
+    .gift-ribbon.vertical {
+        height: 220px;
+    }
+    
+    .screenshot-container {
+        height: 50vh;
+    }
+    
+    .screenshot-text {
+        font-size: 1rem;
+    }
+    
+    .next-btn {
+        padding: 10px 25px;
+        font-size: 1rem;
+        width: 90%;
+        max-width: 250px;
+    }
+}
+</style>
+
+<div class="scene-8" id="scene-container">
+    <!-- Initial borders (from previous scene) -->
+    <div class="thread-border thread-border-top" id="border-top"></div>
+    <div class="thread-border thread-border-bottom" id="border-bottom"></div>
+    <div class="thread-border thread-border-left" id="border-left"></div>
+    <div class="thread-border thread-border-right" id="border-right"></div>
+    
+    <!-- White gift box -->
+    <div class="gift-box hidden" id="gift-box"></div>
+    
+    <!-- Gift ribbons (appear after wrapping) -->
+    <div class="gift-ribbon hidden" id="ribbon-horizontal"></div>
+    <div class="gift-ribbon vertical hidden" id="ribbon-vertical"></div>
+    
+    <!-- Gift bow -->
+    <div class="gift-bow hidden" id="gift-bow"></div>
+    
+    <!-- Text containers -->
+    <div class="text-container hidden" id="text-container-1">
+        <div class="main-text hidden" id="text-1">
+            i wish i could give a thing but all of it is virtual
+        </div>
+    </div>
+    
+    <div class="text-container hidden" id="text-container-2">
+        <div class="main-text hidden" id="text-2">
+            n all i have is words which i gave
+        </div>
+    </div>
+    
+    <div class="text-container hidden" id="text-container-3">
+        <div class="main-text hidden" id="text-3">
+            so i give this voice of black<br>
+            <span class="emphasized-text">cuz he wanted to wish</span>
+        </div>
+    </div>
+    
+    <!-- Screenshot container -->
+    <div class="screenshot-container hidden" id="screenshot-container">
+        <img src="{{ url_for('static', filename='images/image.png') }}" 
+             class="screenshot-image" 
+             id="screenshot-image"
+             alt="Birthday Screenshot"
+             onerror="handleImageError()">
+        <div class="screenshot-text">
+            "so here it is a screenshot"
+        </div>
+    </div>
+    
+    <!-- Next button -->
+    <button class="next-btn hidden" id="next-btn" onclick="nextScene()">
+        NEXT=>
+    </button>
+</div>
+
+<script>
+// DOM elements
+const sceneContainer = document.getElementById('scene-container');
+const borderTop = document.getElementById('border-top');
+const borderBottom = document.getElementById('border-bottom');
+const borderLeft = document.getElementById('border-left');
+const borderRight = document.getElementById('border-right');
+const giftBox = document.getElementById('gift-box');
+const ribbonHorizontal = document.getElementById('ribbon-horizontal');
+const ribbonVertical = document.getElementById('ribbon-vertical');
+const giftBow = document.getElementById('gift-bow');
+const textContainer1 = document.getElementById('text-container-1');
+const textContainer2 = document.getElementById('text-container-2');
+const textContainer3 = document.getElementById('text-container-3');
+const text1 = document.getElementById('text-1');
+const text2 = document.getElementById('text-2');
+const text3 = document.getElementById('text-3');
+const screenshotContainer = document.getElementById('screenshot-container');
+const screenshotImage = document.getElementById('screenshot-image');
+const nextBtn = document.getElementById('next-btn');
+
+// Image error handling
+function handleImageError() {
+    const screenshotContainer = document.getElementById('screenshot-container');
+    if (screenshotContainer) {
+        screenshotContainer.innerHTML = `
+            <div style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+                text-align: center;
+                padding: 20px;
+                background: white;
+            ">
+                <div style="font-size: 4rem; margin-bottom: 20px; color: #333;">
+                    📸🎂
+                </div>
+                <div style="font-size: 2rem; color: #333; margin-bottom: 10px;">
+                    Birthday Screenshot
+                </div>
+                <div style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">
+                    "so here it is a screenshot"
+                </div>
+                <div style="
+                    margin-top: 20px;
+                    padding: 10px 20px;
+                    background: linear-gradient(45deg, #FF0000, #FF4500);
+                    color: white;
+                    border-radius: 5px;
+                    font-weight: bold;
+                ">
+                    Happy Birthday! 🎂
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Wrap borders around the box
+function wrapBordersAroundBox() {
+    // Add wrapping animations to borders
+    borderTop.style.animation = 'wrapTop 2s ease forwards';
+    borderBottom.style.animation = 'wrapBottom 2s ease forwards';
+    borderLeft.style.animation = 'wrapLeft 2s ease forwards';
+    borderRight.style.animation = 'wrapRight 2s ease forwards';
+    
+    // After borders wrap around, show ribbon and bow
+    setTimeout(() => {
+        // Add glow effect to wrapped borders
+        borderTop.classList.add('gift-wrapped');
+        borderBottom.classList.add('gift-wrapped');
+        borderLeft.classList.add('gift-wrapped');
+        borderRight.classList.add('gift-wrapped');
+        
+        // Show ribbons
+        ribbonHorizontal.classList.remove('hidden');
+        ribbonVertical.classList.remove('hidden');
+        setTimeout(() => {
+            ribbonHorizontal.classList.add('visible');
+            ribbonVertical.classList.add('visible');
+            
+            // Show bow
+            setTimeout(() => {
+                giftBow.classList.remove('hidden');
+                giftBow.classList.add('visible');
+            }, 500);
+        }, 100);
+    }, 2000);
+}
+
+// Scene sequence
+let currentStep = 0;
+const totalSteps = 7;
+
+function initScene() {
+    // Start with borders visible
+    borderTop.style.opacity = '1';
+    borderBottom.style.opacity = '1';
+    borderLeft.style.opacity = '1';
+    borderRight.style.opacity = '1';
+    
+    // Start the sequence
+    setTimeout(() => {
+        nextStep();
+    }, 1000);
+}
+
+function nextStep() {
+    currentStep++;
+    
+    switch(currentStep) {
+        case 1:
+            // Show first text
+            textContainer1.classList.remove('hidden');
+            setTimeout(() => {
+                textContainer1.classList.add('visible');
+                
+                setTimeout(() => {
+                    text1.classList.remove('hidden');
+                    text1.classList.add('visible');
+                    
+                    setTimeout(() => {
+                        nextStep();
+                    }, 3000);
+                }, 500);
+            }, 100);
+            break;
+            
+        case 2:
+            // Show white box
+            text1.classList.remove('visible');
+            text1.classList.add('fade-out');
+            textContainer1.classList.remove('visible');
+            textContainer1.classList.add('fade-out');
+            
+            setTimeout(() => {
+                giftBox.classList.remove('hidden');
+                giftBox.classList.add('visible');
+                
+                setTimeout(() => {
+                    nextStep();
+                }, 1500);
+            }, 500);
+            break;
+            
+        case 3:
+            // Wrap borders around the box to make it a gift
+            wrapBordersAroundBox();
+            
+            setTimeout(() => {
+                nextStep();
+            }, 3000);
+            break;
+            
+        case 4:
+            // Fade out gift, show second text
+            giftBox.classList.remove('visible');
+            giftBox.classList.add('fade-out');
+            ribbonHorizontal.classList.remove('visible');
+            ribbonHorizontal.classList.add('fade-out');
+            ribbonVertical.classList.remove('visible');
+            ribbonVertical.classList.add('fade-out');
+            giftBow.classList.remove('visible');
+            giftBow.classList.add('fade-out');
+            
+            setTimeout(() => {
+                textContainer2.classList.remove('hidden');
+                setTimeout(() => {
+                    textContainer2.classList.add('visible');
+                    
+                    setTimeout(() => {
+                        text2.classList.remove('hidden');
+                        text2.classList.add('visible');
+                        
+                        setTimeout(() => {
+                            nextStep();
+                        }, 2500);
+                    }, 500);
+                }, 100);
+            }, 500);
+            break;
+            
+        case 5:
+            // Fade out second text, show third text
+            text2.classList.remove('visible');
+            text2.classList.add('fade-out');
+            textContainer2.classList.remove('visible');
+            textContainer2.classList.add('fade-out');
+            
+            setTimeout(() => {
+                textContainer3.classList.remove('hidden');
+                setTimeout(() => {
+                    textContainer3.classList.add('visible');
+                    
+                    setTimeout(() => {
+                        text3.classList.remove('hidden');
+                        text3.classList.add('visible');
+                        
+                        setTimeout(() => {
+                            nextStep();
+                        }, 3000);
+                    }, 500);
+                }, 100);
+            }, 500);
+            break;
+            
+        case 6:
+            // Show screenshot
+            text3.classList.remove('visible');
+            text3.classList.add('fade-out');
+            textContainer3.classList.remove('visible');
+            textContainer3.classList.add('fade-out');
+            
+            setTimeout(() => {
+                screenshotContainer.classList.remove('hidden');
+                setTimeout(() => {
+                    screenshotContainer.classList.add('visible');
+                    
+                    setTimeout(() => {
+                        nextStep();
+                    }, 4000);
+                }, 100);
+            }, 500);
+            break;
+            
+        case 7:
+            // Show next button
+            setTimeout(() => {
+                nextBtn.classList.remove('hidden');
+                setTimeout(() => {
+                    nextBtn.classList.add('visible');
+                }, 100);
+            }, 500);
+            break;
+    }
+}
+
+// Next scene function
+function nextScene() {
+    window.location.href = "/scene/9";
+}
+
+// Start the scene
+document.addEventListener('DOMContentLoaded', function() {
+    initScene();
+    
+    // Set up image error handler
+    if (screenshotImage) {
+        screenshotImage.onerror = handleImageError;
+    }
+});
+</script>
+
+{% endblock %}

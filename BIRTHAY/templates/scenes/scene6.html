@@ -1,0 +1,666 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* Scene 6 - Black screen with tangled threads/ropes */
+.scene-6 {
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Courier New', monospace;
+}
+
+/* Thread/Rope styling - realistic looking */
+.thread {
+    position: absolute;
+    border-radius: 4px;
+    background: linear-gradient(to bottom, #8B0000, #B22222, #8B0000);
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    transform-origin: center;
+}
+
+/* Thread texture effect */
+.thread::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.1) 2px,
+        rgba(255, 255, 255, 0.1) 4px
+    );
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+/* Floating background threads - thinner, less prominent */
+.background-thread {
+    opacity: 0.3;
+    background: linear-gradient(90deg, rgba(139, 0, 0, 0.3) 0%, #8B0000 50%, rgba(139, 0, 0, 0.3) 100%);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+.background-thread::before {
+    opacity: 0.2;
+}
+
+/* Main tangled threads - thicker, more prominent */
+.tangled-thread {
+    opacity: 0.8;
+    background: linear-gradient(to bottom, #8B0000, #DC143C, #8B0000);
+    box-shadow: 
+        0 3px 6px rgba(0, 0, 0, 0.7),
+        0 0 15px rgba(255, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Single remaining thread - glowing */
+.single-thread {
+    background: linear-gradient(to bottom, #FF0000, #FF4500, #FF0000);
+    box-shadow: 
+        0 0 20px rgba(255, 0, 0, 0.8),
+        0 0 40px rgba(255, 69, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.single-thread::before {
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 3px,
+        rgba(255, 255, 255, 0.2) 3px,
+        rgba(255, 255, 255, 0.2) 6px
+    );
+}
+
+/* Floating animation for background threads */
+@keyframes floatThread1 {
+    0% {
+        transform: translateX(-100px) translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateX(50vw) translateY(-30px) rotate(2deg);
+    }
+    100% {
+        transform: translateX(110vw) translateY(0) rotate(0deg);
+    }
+}
+
+@keyframes floatThread2 {
+    0% {
+        transform: translateX(-150px) translateY(100px) rotate(5deg);
+    }
+    50% {
+        transform: translateX(50vw) translateY(70px) rotate(-3deg);
+    }
+    100% {
+        transform: translateX(120vw) translateY(100px) rotate(5deg);
+    }
+}
+
+@keyframes floatThread3 {
+    0% {
+        transform: translateX(-200px) translateY(200px) rotate(-3deg);
+    }
+    50% {
+        transform: translateX(50vw) translateY(170px) rotate(4deg);
+    }
+    100% {
+        transform: translateX(115vw) translateY(200px) rotate(-3deg);
+    }
+}
+
+/* Text container - centered */
+.text-container {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+}
+
+.text-container.visible {
+    opacity: 1;
+}
+
+/* Text lines */
+.text-line {
+    color: white;
+    font-size: 1.8rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 1.2s ease;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.text-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Emphasized text */
+.emphasized {
+    color: #ff4444;
+    font-weight: bold;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.7), 0 0 25px rgba(255, 0, 0, 0.4);
+}
+
+/* Main tangled threads container */
+.tangled-threads-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    z-index: 3;
+    opacity: 0;
+}
+
+.tangled-threads-container.visible {
+    opacity: 1;
+}
+
+/* Knot/tangle animation */
+@keyframes untangleKnot {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    25% {
+        transform: scale(0.9) rotate(90deg);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(0.7) rotate(180deg);
+        opacity: 0.7;
+    }
+    75% {
+        transform: scale(0.5) rotate(270deg);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(0.3) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Individual thread untangling */
+@keyframes threadUntangle {
+    0% {
+        transform: translate(var(--startX), var(--startY)) rotate(var(--startRotate));
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--endX), var(--endY)) rotate(var(--endRotate));
+        opacity: 0;
+    }
+}
+
+/* Single thread stretching to "you" */
+@keyframes stretchToYou {
+    0% {
+        width: 10px;
+        height: 100%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(0deg);
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(10deg);
+    }
+    60% {
+        transform: translate(-50%, -50%) rotate(-5deg);
+        height: 500px;
+    }
+    100% {
+        width: 10px;
+        height: 100%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* Single thread that remains */
+.remaining-thread {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 4px;
+    z-index: 4;
+    opacity: 0;
+}
+
+/* Final message */
+.final-message {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 2.2rem;
+    text-align: center;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.final-message.visible {
+    opacity: 1;
+}
+
+.final-text {
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.final-subtext {
+    font-size: 1.4rem;
+    color: #ff6666;
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+    font-style: italic;
+}
+
+/* Next button */
+.scene6-next-btn {
+    padding: 15px 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #ff4444;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #ff4444;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-top: 30px;
+    opacity: 0;
+    position: relative;
+    overflow: hidden;
+    z-index: 6;
+}
+
+.scene6-next-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 68, 68, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.scene6-next-btn:hover::before {
+    left: 100%;
+}
+
+.scene6-next-btn.visible {
+    opacity: 1;
+}
+
+.scene6-next-btn:hover {
+    background: rgba(255, 68, 68, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+}
+
+/* Hidden class */
+.hidden {
+    display: none !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .text-line {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+    
+    .tangled-threads-container {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .final-message {
+        font-size: 1.8rem;
+        bottom: 80px;
+    }
+    
+    .final-subtext {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .text-line {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+    
+    .tangled-threads-container {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .final-message {
+        font-size: 1.5rem;
+        bottom: 60px;
+    }
+    
+    .final-subtext {
+        font-size: 1rem;
+    }
+}
+</style>
+
+<div class="scene-6" id="scene-container">
+    <!-- Background floating threads -->
+    <div id="background-threads"></div>
+    
+    <!-- Text container -->
+    <div class="text-container" id="text-container">
+        <div class="text-line" id="text-line-1">
+            In this world of people of multiple <span class="emphasized">red threads</span>
+        </div>
+        <div class="text-line" id="text-line-2">
+            one <span class="emphasized">tangled thread</span> remains
+        </div>
+        <div class="text-line" id="text-line-3">
+            the fate is connected
+        </div>
+        <div class="text-line" id="text-line-4">
+            no matter how much tangled
+        </div>
+    </div>
+    
+    <!-- Main tangled threads -->
+    <div class="tangled-threads-container hidden" id="tangled-threads-container">
+        <!-- Threads will be generated by JavaScript -->
+    </div>
+    
+    <!-- Single remaining thread -->
+    <div class="remaining-thread hidden" id="remaining-thread"></div>
+    
+    <!-- Final message -->
+    <div class="final-message hidden" id="final-message">
+        <div class="final-text" id="final-text">N so it happens </div>
+        <div class="final-subtext" id="final-subtext"><pre>     my  thread       goes towards you</pre></div>
+        <button class="scene6-next-btn hidden" id="scene6-next-btn" onclick="nextScene()">
+            CONTINUE JOURNEY →
+        </button>
+    </div>
+</div>
+
+<script>
+// DOM elements
+const sceneContainer = document.getElementById('scene-container');
+const backgroundThreads = document.getElementById('background-threads');
+const textContainer = document.getElementById('text-container');
+const textLine1 = document.getElementById('text-line-1');
+const textLine2 = document.getElementById('text-line-2');
+const textLine3 = document.getElementById('text-line-3');
+const textLine4 = document.getElementById('text-line-4');
+const tangledThreadsContainer = document.getElementById('tangled-threads-container');
+const remainingThread = document.getElementById('remaining-thread');
+const finalMessage = document.getElementById('final-message');
+const scene6NextBtn = document.getElementById('scene6-next-btn');
+
+// Create realistic background threads
+function createBackgroundThreads() {
+    const threadAnimations = ['floatThread1', 'floatThread2', 'floatThread3'];
+    
+    // Create 8-10 background threads
+    for (let i = 0; i < 10; i++) {
+        const thread = document.createElement('div');
+        thread.className = 'thread background-thread';
+        
+        // Thread properties
+        const width = Math.random() * 4 + 2; // 2-6px thickness
+        const height = Math.random() * 80 + 40; // 40-120px length
+        const top = Math.random() * 100; // Random vertical position
+        const animation = threadAnimations[Math.floor(Math.random() * threadAnimations.length)];
+        const duration = Math.random() * 25 + 15; // 15-40 seconds
+        const delay = Math.random() * 10; // 0-10 second delay
+        
+        thread.style.width = `${width}px`;
+        thread.style.height = `${height}px`;
+        thread.style.top = `${top}%`;
+        thread.style.animation = `${animation} ${duration}s linear ${delay}s infinite`;
+        
+        backgroundThreads.appendChild(thread);
+    }
+}
+
+// Create main tangled threads (thicker, more prominent)
+function createTangledThreads() {
+    tangledThreadsContainer.innerHTML = '';
+    
+    // Create 6-8 thick threads in a tangled knot
+    const threadCount = 7;
+    const centerX = 200; // Center of container
+    const centerY = 200;
+    const radius = 100; // Radius of tangled knot
+    
+    for (let i = 0; i < threadCount; i++) {
+        const thread = document.createElement('div');
+        thread.className = 'thread tangled-thread';
+        
+        // Position threads in a tangled knot formation
+        const angle = (i * (360 / threadCount)) * (Math.PI / 180);
+        const offsetX = Math.cos(angle) * radius;
+        const offsetY = Math.sin(angle) * radius;
+        
+        // Thread properties
+        const width = Math.random() * 6 + 4; // 4-10px thickness (thicker)
+        const length = Math.random() * 120 + 80; // 80-200px length
+        
+        // Create curved, tangled appearance
+        const startX = centerX + offsetX;
+        const startY = centerY + offsetY;
+        const endX = centerX - offsetX * 0.7;
+        const endY = centerY - offsetY * 0.7;
+        
+        // Calculate line angle and length
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const threadLength = Math.sqrt(dx * dx + dy * dy);
+        const threadAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+        
+        // Add some random twisting
+        const twist = Math.random() * 30 - 15;
+        
+        thread.style.width = `${threadLength}px`;
+        thread.style.height = `${width}px`;
+        thread.style.left = `${startX}px`;
+        thread.style.top = `${startY}px`;
+        thread.style.transform = `rotate(${threadAngle + twist}deg)`;
+        thread.style.transformOrigin = '0 50%';
+        
+        // Store animation properties
+        thread.dataset.startX = startX;
+        thread.dataset.startY = startY;
+        thread.dataset.angle = threadAngle + twist;
+        
+        tangledThreadsContainer.appendChild(thread);
+    }
+    
+    // Add a few more threads crossing through the center for more tangled look
+    for (let i = 0; i < 3; i++) {
+        const crossThread = document.createElement('div');
+        crossThread.className = 'thread tangled-thread';
+        
+        const angle = Math.random() * 360;
+        const length = Math.random() * 150 + 100;
+        const width = Math.random() * 5 + 3;
+        
+        crossThread.style.width = `${length}px`;
+        crossThread.style.height = `${width}px`;
+        crossThread.style.left = `${centerX - length/2}px`;
+        crossThread.style.top = `${centerY}px`;
+        crossThread.style.transform = `rotate(${angle}deg)`;
+        crossThread.style.transformOrigin = '50% 50%';
+        
+        tangledThreadsContainer.appendChild(crossThread);
+    }
+}
+
+// Animate text lines
+function animateTextLines() {
+    setTimeout(() => {
+        textContainer.classList.add('visible');
+        
+        setTimeout(() => {
+            textLine1.classList.add('visible');
+            
+            setTimeout(() => {
+                textLine2.classList.add('visible');
+                
+                setTimeout(() => {
+                    textLine3.classList.add('visible');
+                    
+                    setTimeout(() => {
+                        textLine4.classList.add('visible');
+                        
+                        // Show tangled threads after text
+                        setTimeout(() => {
+                            showTangledThreads();
+                        }, 1500);
+                        
+                    }, 1500);
+                }, 1500);
+            }, 1500);
+        }, 1500);
+    }, 1500);
+}
+
+// Show tangled threads
+function showTangledThreads() {
+    // Fade text slightly
+    textContainer.style.opacity = '0.5';
+    
+    // Show tangled threads container
+    tangledThreadsContainer.classList.remove('hidden');
+    setTimeout(() => {
+        tangledThreadsContainer.classList.add('visible');
+        
+        // Wait, then start untangling
+        setTimeout(() => {
+            untangleThreads();
+        }, 2000);
+    }, 500);
+}
+
+// Untangle threads animation
+function untangleThreads() {
+    const threads = tangledThreadsContainer.querySelectorAll('.thread');
+    
+    // Animate each thread to "untangle" (move away and fade out)
+    threads.forEach((thread, index) => {
+        setTimeout(() => {
+            // Calculate random end position off-screen
+            const endX = (Math.random() - 0.5) * 1000;
+            const endY = (Math.random() - 0.5) * 1000;
+            const endRotate = Math.random() * 360;
+            
+            // Set CSS variables for animation
+            thread.style.setProperty('--startX', '0px');
+            thread.style.setProperty('--startY', '0px');
+            thread.style.setProperty('--endX', `${endX}px`);
+            thread.style.setProperty('--endY', `${endY}px`);
+            thread.style.setProperty('--startRotate', '0deg');
+            thread.style.setProperty('--endRotate', `${endRotate}deg`);
+            
+            // Start untangle animation
+            thread.style.animation = `threadUntangle 1.5s ease forwards`;
+            
+            // After all threads untangle, show single remaining thread
+            if (index === threads.length - 1) {
+                setTimeout(() => {
+                    showRemainingThread();
+                }, 2000);
+            }
+        }, index * 200);
+    });
+}
+
+// Show single remaining thread
+function showRemainingThread() {
+    // Hide tangled threads
+    tangledThreadsContainer.style.opacity = '0';
+    
+    // Create and show the single remaining thread
+    remainingThread.classList.remove('hidden');
+    remainingThread.className = 'remaining-thread single-thread';
+    remainingThread.style.width = '10px';
+    remainingThread.style.height = '400px';
+    remainingThread.style.animation = 'stretchToYou 2.5s ease forwards';
+    
+    // Show final message
+    setTimeout(() => {
+        showFinalMessage();
+    }, 3000);
+}
+
+// Show final message
+function showFinalMessage() {
+    // Hide text container completely
+    textContainer.style.opacity = '0';
+    
+    // Show final message
+    finalMessage.classList.remove('hidden');
+    setTimeout(() => {
+        finalMessage.classList.add('visible');
+        
+        // Show next button
+        setTimeout(() => {
+            scene6NextBtn.classList.remove('hidden');
+            scene6NextBtn.classList.add('visible');
+        }, 1000);
+    }, 500);
+}
+
+// Next scene function
+function nextScene() {
+    window.location.href = "/scene/7";
+}
+
+// Initialize scene
+document.addEventListener('DOMContentLoaded', function() {
+    // Create background threads
+    createBackgroundThreads();
+    
+    // Create tangled threads
+    createTangledThreads();
+    
+    // Start animation sequence
+    animateTextLines();
+});
+</script>
+
+{% endblock %}

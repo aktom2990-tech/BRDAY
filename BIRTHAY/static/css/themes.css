@@ -1,0 +1,129 @@
+/* ========== GO-EN THEME ========== */
+
+.scene-goen {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+/* LEFT — WHITE (YIN) */
+.goen-left {
+    position: relative;
+    width: 50%;
+    height: 100%;
+    background: white;
+    overflow: hidden;
+}
+
+/* RIGHT — BLACK (YANG) */
+.goen-right {
+    width: 50%;
+    height: 100%;
+    background: black;
+}
+
+/* Sakura softly embedded in white */
+.goen-overlay {
+    position: absolute;
+    inset: 0;
+    background: url("../gifs/sakura.gif") center/cover no-repeat;
+    opacity: 0;
+    animation: blossomFade 2.5s ease forwards;
+    animation-delay: 0.8s;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
+
+/* Centered content */
+.scene-content {
+    position: absolute;
+    inset: 0;
+    max-width: 900px;
+    margin: auto;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 2;
+
+    /* Makes text invert automatically on black */
+    color: #111;
+    mix-blend-mode: difference;
+}
+
+/* Title animation */
+.goen-title {
+    font-size: 3.2rem;
+    letter-spacing: 0.25em;
+    margin-bottom: 12px;
+    opacity: 0;
+    transform: translateY(24px);
+    animation: titleIn 1.4s ease forwards;
+}
+
+/* Subtitle */
+.goen-sub {
+    font-size: 1.1rem;
+    opacity: 0;
+    animation: fadeIn 1.2s ease forwards;
+    animation-delay: 1.1s;
+}
+
+/* Quote */
+.goen-quote {
+    margin-top: 40px;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    max-width: 600px;
+    opacity: 0;
+    animation: fadeIn 1.2s ease forwards;
+    animation-delay: 2s;
+}
+
+.goen-quote span {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+/* Continue button */
+.continue-btn {
+    margin-top: 50px;
+    padding: 12px 28px;
+    border: 1px solid currentColor;
+    background: transparent;
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    opacity: 0;
+    animation: fadeIn 1s ease forwards;
+    animation-delay: 3s;
+    transition: all 0.3s ease;
+}
+
+.continue-btn:hover {
+    background: currentColor;
+    color: black;
+}
+
+/* Animations */
+@keyframes blossomFade {
+    from { opacity: 0; }
+    to   { opacity: 0.25; }
+}
+
+@keyframes titleIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}

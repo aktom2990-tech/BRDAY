@@ -1,0 +1,1045 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* Scene 5 (main scene) styles remain the same */
+.scene-5 {
+    width: 100vw;
+    height: 100vh;
+    background: #0a0a0a;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Courier New', monospace;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Insect container - Full screen for reaction GIFs */
+.insect-container {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    left: -200px; /* Start off screen left */
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    transition: all 0.5s ease;
+}
+
+/* When showing reaction GIFs - MAKE FULL SCREEN */
+.insect-container.fullscreen {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100%;
+    max-height: 100%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.insect-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.7));
+}
+
+/* When fullscreen, image should fit screen */
+.insect-container.fullscreen .insect-image {
+    width: 90vw;
+    height: 90vh;
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+
+
+/* PowerPoint "Crawl In" animation */
+@keyframes powerpointCrawl {
+    0% {
+        left: -200px;
+        transform: translateY(-50%) scale(0.8);
+        filter: blur(5px);
+    }
+    20% {
+        left: 15%;
+        transform: translateY(-50%) rotate(15deg) scale(0.9);
+        filter: blur(3px);
+    }
+    40% {
+        left: 30%;
+        transform: translateY(-50%) rotate(-15deg) scale(1);
+        filter: blur(1px);
+    }
+    60% {
+        left: 45%;
+        transform: translateY(-50%) rotate(8deg) scale(1.1);
+        filter: blur(0);
+    }
+    80% {
+        left: 60%;
+        transform: translateY(-50%) rotate(-8deg) scale(1.05);
+    }
+    100% {
+        left: 50%;
+        transform: translateY(-50%) translateX(-50%) rotate(0deg) scale(1);
+    }
+}
+
+/* Chat bubble */
+.chat {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    max-width: 85%;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    text-align: center;
+    min-height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    z-index: 2;
+    position: absolute;
+    border: 3px solid #666;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+    font-weight: 500;
+    bottom: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.chat::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px 10px 0;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
+}
+
+.chat.visible {
+    opacity: 1;
+}
+
+/* Options */
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 85%;
+    max-width: 320px;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    z-index: 3;
+    position: absolute;
+    bottom: 50px;
+}
+
+.options.visible {
+    opacity: 1;
+}
+
+.option-btn {
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 3px solid transparent;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.option-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: 0.5s;
+}
+
+.option-btn:hover::before {
+    left: 100%;
+}
+
+.option-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.option-1 {
+    color: #2e7d32;
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.option-2 {
+    color: #c62828;
+    border-color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+/* Next button */
+.next-btn {
+    margin-top: 20px;
+    padding: 14px 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 3px solid #2196f3;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #2196f3;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    opacity: 0;
+    z-index: 4; /* Above fullscreen container */
+    position: absolute;
+    letter-spacing: 1px;
+    overflow: hidden;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.next-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(33, 150, 243, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.next-btn:hover::before {
+    left: 100%;
+}
+
+.next-btn.visible {
+    opacity: 1;
+}
+
+.next-btn:hover {
+    background: #2196f3;
+    color: white;
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 8px 20px rgba(33, 150, 243, 0.3);
+}
+
+/* Insect reactions - FULL SCREEN */
+.insect-happy {
+    animation: happyDance 1.2s infinite alternate ease-in-out;
+    filter: drop-shadow(0 0 20px rgba(76, 175, 80, 0.5));
+}
+
+@keyframes happyDance {
+    0% {
+        transform: scale(1) rotate(-5deg);
+    }
+    100% {
+        transform: scale(1.05) rotate(5deg);
+    }
+}
+
+.insect-sad {
+    animation: sadShake 0.8s infinite ease-in-out;
+    filter: drop-shadow(0 0 15px rgba(244, 67, 54, 0.3)) brightness(0.8);
+}
+
+@keyframes sadShake {
+    0%, 100% {
+        transform: scale(1) translateX(0);
+    }
+    25% {
+        transform: scale(1) translateX(-5px);
+    }
+    75% {
+        transform: scale(1) translateX(5px);
+    }
+}
+
+/* Background glow effects */
+.background-glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+    z-index: 0;
+    opacity: 0.5;
+}
+
+/* Pulse animation for attention */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(33, 150, 243, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Error handling for missing GIF */
+.error-message {
+    color: white;
+    font-size: 1.5rem;
+    text-align: center;
+    z-index: 5;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    display: none;
+}
+
+/* GUESS THE IMPOSTER GAME - Added to same scene */
+.imposter-game {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a0a0a;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+}
+
+.imposter-game.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.game-title {
+    color: white;
+    font-size: 2.2rem;
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Among Us characters container */
+.characters-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.game-character {
+    width: 120px;
+    height: 140px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.game-character:hover {
+    transform: translateY(-5px);
+    border-color: #4cc9f0;
+    box-shadow: 0 5px 15px rgba(76, 201, 240, 0.3);
+}
+
+.game-character.selected {
+    border-color: #f72585;
+    box-shadow: 0 5px 15px rgba(247, 37, 133, 0.5);
+}
+
+.character-number {
+    font-size: 2rem;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.character-label {
+    color: #b8b8b8;
+    font-size: 0.9rem;
+    text-align: center;
+    line-height: 1.3;
+    padding: 0 5px;
+}
+
+/* Game options text */
+.game-options-text {
+    color: white;
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* REMOVED: Game submit button */
+
+/* Game result message - FIXED POSITIONING */
+.game-result-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 90%;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    border: 3px solid #f72585;
+    width: 90%;
+    max-width: 500px;
+    /* Add bottom margin to make room for GIF */
+    margin-top: 150px; /* This pushes the message down to make room for GIF above */
+}
+
+.game-result-message.visible {
+    opacity: 1;
+}
+
+.game-result-title {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.game-result-text {
+    font-size: 1.1rem;
+    color: #b8b8b8;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    min-height: 60px; /* Ensure consistent height */
+}
+
+/* Among Us dance GIF in game */
+.game-amongus-dance {
+    width: 180px;
+    height: 180px;
+    margin: 15px auto;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+/* Game next button - FIXED POSITION */
+.game-next-btn {
+    padding: 12px 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 3px solid #2196f3;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #2196f3;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    opacity: 1; /* Changed from 0 to 1 */
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+    /* Ensure it's always visible */
+    display: block !important;
+}
+
+.game-next-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(33, 150, 243, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.game-next-btn:hover::before {
+    left: 100%;
+}
+
+.game-next-btn:hover {
+    background: #2196f3;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+}
+
+/* Celebration GIF positioning */
+.celebration-gif {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 15;
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+}
+
+/* FIX: Add proper hidden class */
+.hidden {
+    display: none !important;
+}
+
+/* FIX: Ensure buttons are clickable */
+button {
+    cursor: pointer;
+}
+
+/* Selection confirmation effect */
+@keyframes selectionConfirm {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 5px 15px rgba(247, 37, 133, 0.5);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(247, 37, 133, 0.8);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 5px 15px rgba(247, 37, 133, 0.5);
+    }
+}
+
+.selection-confirmed {
+    animation: selectionConfirm 0.5s ease;
+}
+
+/* Wrong answer message */
+.wrong-answer-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 90%;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    border: 3px solid #ff0000;
+    width: 90%;
+    max-width: 500px;
+}
+
+.wrong-answer-message.visible {
+    opacity: 1;
+}
+
+.wrong-answer-title {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.wrong-answer-text {
+    font-size: 1.1rem;
+    color: #ff9999;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.wrong-ok-btn {
+    padding: 12px 30px;
+    background: rgba(255, 0, 0, 0.9);
+    border: 3px solid #ff0000;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.wrong-ok-btn:hover {
+    background: #ff3333;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+}
+
+/* Instructions text */
+.instructions {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    text-align: center;
+    margin-top: -15px;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+/* Fade out effect */
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+</style>
+
+<div class="scene-5" id="scene-container">
+    <!-- Background glow effect -->
+    <div class="background-glow"></div>
+    
+    <!-- Insect - PowerPoint style crawl in -->
+    <div class="insect-container" id="insect-container">
+        <img src="{{ url_for('static', filename='images/insect.png') }}" 
+             class="insect-image" 
+             id="insect"
+             alt="Mocking Insect"
+             onerror="handleImageError('insect')">
+        <div id="insect-emoji" class="hidden">🪲</div>
+    </div>
+    
+    <!-- Chat bubble (initial question only) -->
+    <div class="chat" id="chat">
+        Will i be appreciated if I was an insect ?????
+    </div>
+    
+    <!-- Options -->
+    <div class="options" id="options">
+        <button class="option-btn option-1" onclick="choose('yes')">
+            ✓ Yesssss(thts 5 s!!!)
+        </button>
+        <button class="option-btn option-2" onclick="choose('no')">
+            ✗ Hate is hate
+        </button>
+    </div>
+    
+    <!-- Next button -->
+    <button class="next-btn pulse hidden" id="next" onclick="startImposterGame()">
+        → NEXT
+    </button>
+    
+    <!-- Error message (hidden by default) -->
+    <div id="error-message" class="error-message hidden"></div>
+    
+    <!-- GUESS THE IMPOSTER GAME (hidden initially) -->
+    <div class="imposter-game hidden" id="imposter-game">
+        <!-- Among Us dance GIF -->
+        <img src="{{ url_for('static', filename='gifs/amongusdance.gif') }}" 
+             class="game-amongus-dance" 
+             id="game-amongus-dance"
+             alt="Among Us Dance"
+             onerror="handleAmongUsError()">
+        <div id="game-dance-emoji" class="hidden">👾💃</div>
+        
+        <!-- Title -->
+        <h1 class="game-title" id="game-title">GUESS THE IMPOSTER</h1>
+        
+        <!-- Instructions -->
+        <div class="instructions" id="instructions">
+            Click on one of the cards below to choose who you think is the imposter!
+        </div>
+        
+        <!-- Among Us characters - Click directly on these cards -->
+        <div class="characters-container" id="game-characters">
+            <div class="game-character" data-choice="1" onclick="handleCharacterSelection(1)">
+                <div class="character-number">1</div>
+                <div class="character-label">me</div>
+            </div>
+            <div class="game-character" data-choice="2" onclick="handleCharacterSelection(2)">
+                <div class="character-number">2</div>
+                <div class="character-label">u</div>
+            </div>
+            <div class="game-character" data-choice="3" onclick="handleCharacterSelection(3)">
+                <div class="character-number">3</div>
+                <div class="character-label">literally<br>everyone</div>
+            </div>
+        </div>
+        
+        <!-- Options text -->
+        <div class="game-options-text" id="game-options-text">
+            1) me &nbsp;&nbsp; 2) u &nbsp;&nbsp; 3) literally every one in the world
+        </div>
+        
+        <!-- Result message -->
+        <div class="game-result-message hidden" id="game-result-message">
+            <div class="game-result-title" id="game-result-title"></div>
+            <div class="game-result-text" id="game-result-text"></div>
+            <!-- REMOVED: hidden class from the button -->
+            <button class="game-next-btn" id="game-next-btn" onclick="nextScene()">
+                FINAL NEXT →
+            </button>
+        </div>
+        
+        <!-- Wrong answer message -->
+        <div class="wrong-answer-message hidden" id="wrong-answer-message">
+            <div class="wrong-answer-title" id="wrong-answer-title"></div>
+            <div class="wrong-answer-text" id="wrong-answer-text"></div>
+            <button class="wrong-ok-btn" id="wrong-ok-btn" onclick="resetGame()">
+                TRY AGAIN
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// === FIXED CODE - DIRECT CARD SELECTION ===
+
+// DOM elements
+const insectContainer = document.getElementById('insect-container');
+const insectImage = document.getElementById('insect');
+const insectEmoji = document.getElementById('insect-emoji');
+const chat = document.getElementById('chat');
+const options = document.getElementById('options');
+const nextBtn = document.getElementById('next');
+const errorMessage = document.getElementById('error-message');
+
+const imposterGame = document.getElementById('imposter-game');
+const gameResultMessage = document.getElementById('game-result-message');
+const gameResultTitle = document.getElementById('game-result-title');
+const gameResultText = document.getElementById('game-result-text');
+const gameNextBtn = document.getElementById('game-next-btn');
+const gameAmongUsGif = document.getElementById('game-amongus-dance');
+const gameDanceEmoji = document.getElementById('game-dance-emoji');
+const instructions = document.getElementById('instructions');
+const gameOptionsText = document.getElementById('game-options-text');
+const wrongAnswerMessage = document.getElementById('wrong-answer-message');
+const wrongAnswerTitle = document.getElementById('wrong-answer-title');
+const wrongAnswerText = document.getElementById('wrong-answer-text');
+const wrongOkBtn = document.getElementById('wrong-ok-btn');
+
+let choiceMade = false;
+let selectedImposter = null;
+let gameStarted = false;
+
+// ========== FIX 1: Properly handle GIF loading ==========
+function handleImageError(type) {
+    if (type === 'insect') {
+        insectImage.classList.add('hidden');
+        insectEmoji.classList.remove('hidden');
+        insectEmoji.style.fontSize = '4rem';
+        insectEmoji.style.filter = 'drop-shadow(0 0 10px white)';
+        insectEmoji.style.animation = 'powerpointCrawl 4s ease-in-out forwards';
+    }
+}
+
+function handleAmongUsError() {
+    gameAmongUsGif.classList.add('hidden');
+    gameDanceEmoji.classList.remove('hidden');
+    gameDanceEmoji.style.fontSize = '3rem';
+    gameDanceEmoji.style.color = 'white';
+    gameDanceEmoji.style.textAlign = 'center';
+}
+
+// ========== FIX 2: Fixed PowerPoint crawl ==========
+function powerpointCrawl() {
+    insectContainer.style.animation = 'powerpointCrawl 4s ease-in-out forwards';
+    
+    setTimeout(() => {
+        chat.classList.add('visible');
+        setTimeout(() => {
+            options.classList.add('visible');
+        }, 1000);
+    }, 4000);
+}
+
+// ========== FIX 3: Fixed choice function ==========
+function choose(choice) {
+    if (choiceMade) return;
+    choiceMade = true;
+    
+    chat.classList.remove('visible');
+    options.classList.remove('visible');
+    insectContainer.classList.add('fullscreen');
+    
+    // Clear previous error handlers
+    insectImage.onerror = null;
+    
+    if (choice === 'yes') {
+        // Happy path
+        insectImage.onload = function() {
+            // GIF loaded successfully
+            insectContainer.classList.add('insect-happy');
+            insectContainer.classList.remove('insect-sad');
+            
+            setTimeout(() => {
+                nextBtn.classList.remove('hidden');
+                nextBtn.classList.add('visible');
+                nextBtn.classList.add('pulse');
+            }, 1500);
+        };
+        
+        insectImage.onerror = function() {
+            // GIF failed to load
+            errorMessage.textContent = "hehe 🐝";
+            errorMessage.classList.remove('hidden');
+            setTimeout(() => {
+                nextBtn.classList.remove('hidden');
+                nextBtn.classList.add('visible');
+                nextBtn.classList.add('pulse');
+            }, 1500);
+        };
+        
+        insectImage.src = "{{ url_for('static', filename='gifs/embaresd.gif') }}";
+        
+    } else {
+        // Sad path - try multiple GIFs
+        let currentAttempt = 0;
+        const gifs = [
+            "{{ url_for('static', filename='gifs/sad.gif') }}",
+            "{{ url_for('static', filename='gifs/sadanime.gif') }}"
+        ];
+        
+        function tryLoadGif() {
+            if (currentAttempt < gifs.length) {
+                insectImage.src = gifs[currentAttempt];
+                currentAttempt++;
+            } else {
+                // All GIFs failed
+                errorMessage.textContent = "sad insect noises... 🥺";
+                errorMessage.classList.remove('hidden');
+                setTimeout(() => {
+                    nextBtn.classList.remove('hidden');
+                    nextBtn.classList.add('visible');
+                    nextBtn.classList.add('pulse');
+                }, 1500);
+            }
+        }
+        
+        insectImage.onload = function() {
+            // GIF loaded successfully
+            insectContainer.classList.add('insect-sad');
+            insectContainer.classList.remove('insect-happy');
+            
+            setTimeout(() => {
+                nextBtn.classList.remove('hidden');
+                nextBtn.classList.add('visible');
+                nextBtn.classList.add('pulse');
+            }, 1500);
+        };
+        
+        insectImage.onerror = tryLoadGif;
+        
+        // Start loading first GIF
+        tryLoadGif();
+    }
+}
+
+// ========== FIX 4: Fixed imposter game transition ==========
+function startImposterGame() {
+    // Fade out insect scene
+    insectContainer.style.opacity = '0';
+    chat.style.opacity = '0';
+    options.style.opacity = '0';
+    nextBtn.style.opacity = '0';
+    errorMessage.style.opacity = '0';
+    
+    setTimeout(() => {
+        // Hide insect scene completely
+        insectContainer.classList.add('hidden');
+        chat.classList.add('hidden');
+        options.classList.add('hidden');
+        nextBtn.classList.add('hidden');
+        errorMessage.classList.add('hidden');
+        
+        // Show imposter game
+        imposterGame.classList.remove('hidden');
+        setTimeout(() => {
+            imposterGame.classList.add('visible');
+            gameStarted = true;
+        }, 100);
+    }, 500);
+}
+
+// ========== NEW: Handle direct card selection ==========
+function handleCharacterSelection(choice) {
+    if (!gameStarted) return;
+    
+    // Remove selection from all characters
+    document.querySelectorAll('.game-character').forEach(char => {
+        char.classList.remove('selected');
+        char.classList.remove('selection-confirmed');
+    });
+    
+    // Add selection to clicked character
+    const selected = document.querySelector(`.game-character[data-choice="${choice}"]`);
+    selected.classList.add('selected');
+    selected.classList.add('selection-confirmed');
+    selectedImposter = choice;
+    
+    // Disable further clicks temporarily
+    document.querySelectorAll('.game-character').forEach(char => {
+        char.style.pointerEvents = 'none';
+    });
+    
+    // Process the selection after animation
+    setTimeout(() => {
+        processSelection(choice);
+    }, 600);
+}
+
+function processSelection(choice) {
+    // Random answer (1, 2, or 3) - FIXED: Always 3 is correct
+    const correctAnswer = 3;
+    
+    // Hide game elements
+    document.querySelectorAll('.game-character').forEach(char => {
+        char.style.opacity = '0';
+    });
+    
+    instructions.style.opacity = '0';
+    gameOptionsText.style.opacity = '0';
+    gameAmongUsGif.style.opacity = '0';
+    if (gameDanceEmoji.style.display !== 'none') {
+        gameDanceEmoji.style.opacity = '0';
+    }
+    
+    setTimeout(() => {
+        if (choice === correctAnswer) {
+            // CORRECT ANSWER - Show Among Us dance GIF
+            
+            // First, hide the current Among Us GIF in the game
+            gameAmongUsGif.style.display = 'none';
+            if (gameDanceEmoji && !gameDanceEmoji.classList.contains('hidden')) {
+                gameDanceEmoji.classList.add('hidden');
+            }
+            
+            // Create a new celebration GIF element
+            const celebrationGif = document.createElement('img');
+            celebrationGif.src = "{{ url_for('static', filename='gifs/amongusdance1.gif') }}";
+            celebrationGif.className = 'celebration-gif';
+            celebrationGif.alt = "Among Us Celebration Dance";
+            celebrationGif.onerror = function() {
+                // If GIF fails, show emoji instead
+                celebrationGif.style.display = 'none';
+                const celebrationEmoji = document.createElement('div');
+                celebrationEmoji.textContent = '👾🎉💃🕺🎊';
+                celebrationEmoji.className = 'celebration-gif';
+                celebrationEmoji.style.fontSize = '3rem';
+                celebrationEmoji.style.color = 'white';
+                celebrationEmoji.style.textAlign = 'center';
+                celebrationEmoji.style.textShadow = '0 0 10px rgba(255,255,255,0.5)';
+                imposterGame.appendChild(celebrationEmoji);
+            };
+            
+        imposterGame.appendChild(celebrationGif);
+         
+        document.querySelector('.game-title').style.opacity = '0';
+        // Set the result text
+        gameResultText.textContent = "You got it right! The imposter is literally everyone!\nThat's how Among Us works, n maybe the life itself 🤷‍♂️";
+            
+            // Show result message (already positioned with margin-top)
+            gameResultMessage.classList.remove('hidden');
+            setTimeout(() => {
+                gameResultMessage.classList.add('visible');
+                // Show the next button immediately (no longer hidden)
+                gameNextBtn.style.opacity = '1';
+                gameNextBtn.style.display = 'block';
+            }, 100);
+            
+        } else {
+            // WRONG ANSWER
+            let title = "";
+            let text = "";
+            
+            if (choice === 1) {
+                title = "⚠️ WRONG ANSWER! ⚠️";
+                text = "Seriously? You think YOU'RE the imposter?\nThat's some main character syndrome right there!\nGet over yourself and try again!";
+            } else if (choice === 2) {
+                title = "💀 WRONG ANSWER! 💀";
+                text = "Seriously? ME! I'M the imposter?\nDie for u but wow !\nGet over yourself and think totore!";
+            }
+            
+            wrongAnswerTitle.textContent = title;
+            wrongAnswerText.textContent = text;
+            
+            wrongAnswerMessage.classList.remove('hidden');
+            setTimeout(() => {
+                wrongAnswerMessage.classList.add('visible');
+            }, 100);
+        }
+    }, 500);
+}
+
+function resetGame() {
+    // Hide wrong answer message
+    wrongAnswerMessage.classList.remove('visible');
+    setTimeout(() => {
+        wrongAnswerMessage.classList.add('hidden');
+        
+        // Reset game state
+        document.querySelectorAll('.game-character').forEach(char => {
+            char.classList.remove('selected');
+            char.classList.remove('selection-confirmed');
+            char.style.opacity = '1';
+            char.style.pointerEvents = 'all';
+        });
+        
+        selectedImposter = null;
+        
+        // Show game elements again
+        instructions.style.opacity = '1';
+        gameOptionsText.style.opacity = '1';
+        gameAmongUsGif.style.opacity = '1';
+        if (gameDanceEmoji.style.display !== 'none') {
+            gameDanceEmoji.style.opacity = '1';
+        }
+    }, 300);
+}
+
+function nextScene() {
+    window.location.href = "/scene/6";
+}
+
+// ========== FIX 5: Initialize scene properly ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Start PowerPoint crawl when page loads
+    setTimeout(powerpointCrawl, 800);
+    
+    // Set up error handling for initial insect image
+    insectImage.onerror = function() {
+        handleImageError('insect');
+    };
+    
+    // Set up error handling for Among Us GIF
+    gameAmongUsGif.onerror = handleAmongUsError;
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,623 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* Scene 2 specific styles - Optimized for Mobile Portrait */
+.scene-goen-2 {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
+}
+
+/* Left side - white background */
+.scene-left-2 {
+    width: 50%;
+    height: 100%;
+    background: white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 2s ease;
+}
+
+/* Right side - black background */
+.scene-right-2 {
+    width: 50%;
+    height: 100%;
+    background: black;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 2s ease;
+}
+
+/* Simple date text - Mobile optimized */
+.date-text {
+    max-width: 85%;
+    padding: 20px 15px;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: fadeInUp 1.2s ease-out forwards;
+}
+
+/* November text - WHITE TEXT on BLACK BACKGROUND */
+.november-text {
+    color: rgba(255, 255, 255, 0.98);
+    text-align: center;
+}
+
+/* January text - BLACK TEXT on WHITE BACKGROUND */
+.january-text {
+    color: rgba(0, 0, 0, 0.98);
+    text-align: center;
+}
+
+.date-title {
+    font-size: 1.8rem; /* Smaller for mobile */
+    font-weight: 700;
+    margin-bottom: 15px;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+}
+
+.date-content {
+    font-size: 1rem; /* Smaller for mobile */
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.date-content br {
+    display: block;
+    margin: 8px 0;
+}
+
+/* Center content for scene 2 */
+.scene-content-2 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    pointer-events: none;
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+/* Make sure interactive elements get pointer events */
+.scene-content-2 > * {
+    pointer-events: auto;
+}
+
+/* Title with animation - Mobile optimized */
+.title-animate-2 {
+    font-size: 2.5rem; /* Much smaller for mobile */
+    letter-spacing: 0.2em;
+    margin: 0 0 30px 0;
+    font-weight: 300;
+    line-height: 1.2;
+    text-align: center;
+    
+    background: linear-gradient(90deg, black 50%, white 50%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    
+    text-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(-15px);
+    animation: titleSlideIn 1.8s ease-out 0.5s forwards;
+    padding: 0 10px;
+}
+
+/* Quote styling - Mobile optimized */
+.quote-container {
+    max-width: 90%;
+    text-align: center;
+    opacity: 0;
+    padding: 25px 20px;
+    margin: 15px;
+    border-radius: 12px;
+    animation: fadeIn 1.2s ease-out forwards;
+    box-sizing: border-box;
+}
+
+/* Quote 1 - Split black/white */
+.quote-1-container {
+    background: linear-gradient(90deg, rgba(0,0,0,0.5) 50%, rgba(255,255,255,0.5) 50%);
+    border: 1px solid rgba(0,0,0,0.15);
+    backdrop-filter: blur(5px);
+}
+
+/* Quote 2 - Black background, white text */
+.quote-2-container {
+    background: rgba(0, 0, 0, 0.85);
+    color: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(255,255,255,0.5);
+    backdrop-filter: blur(5px);
+}
+
+/* Quote 3 - White background, black text */
+.quote-3-container {
+    background: rgba(255, 255, 255, 0.85);
+    color: rgba(0, 0, 0, 0.98);
+    border: 1px solid rgba(0,0,0,0.15);
+    backdrop-filter: blur(5px);
+}
+
+.quote-1 {
+    font-size: 1.3rem; /* Smaller for mobile */
+    line-height: 1.7;
+    font-weight: 500;
+}
+
+.quote-line {
+    display: block;
+    opacity: 0;
+    transform: translateY(10px);
+    margin: 12px 0;
+    padding: 10px 0;
+    position: relative;
+    font-size: 1.2rem;
+    line-height: 1.5;
+}
+
+.quote-2 {
+    font-size: 1.2rem; /* Smaller for mobile */
+    line-height: 1.6;
+    font-style: italic;
+    margin: 15px 0;
+    font-weight: 400;
+}
+
+.quote-3 {
+    font-size: 1.1rem; /* Smaller for mobile */
+    line-height: 1.5;
+    margin-top: 20px;
+    font-weight: 400;
+}
+
+/* Continue button for scene 2 - Mobile optimized */
+.continue-btn-2 {
+    margin-top: 30px;
+    padding: 16px 32px;
+    min-width: 200px;
+    
+    background: linear-gradient(90deg, white 50%, black 50%);
+    border: 2px solid #D4AF37; /* Darker gold for better contrast */
+    color: #D4AF37;
+    
+    text-decoration: none;
+    letter-spacing: 0.15em;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    
+    cursor: pointer;
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    transition: all 0.3s ease;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.continue-btn-2:hover, .continue-btn-2:active {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+    background: linear-gradient(90deg, #f8f8f8 50%, #111 50%);
+}
+
+/* Final next button style */
+.next-btn-final {
+    background: white !important;
+    color: black !important;
+    border: 2px solid black !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.next-btn-final:hover, .next-btn-final:active {
+    background: #f0f0f0 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Hide elements initially */
+.hidden {
+    display: none;
+    opacity: 0;
+}
+
+/* Animations - Optimized for mobile */
+@keyframes titleSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-15px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(15px) scale(0.97);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+}
+
+@keyframes quoteLineFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes textSplitAnimation {
+    0% {
+        background: linear-gradient(90deg, #000 50%, #fff 50%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+    50% {
+        background: linear-gradient(90deg, #fff 50%, #000 50%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+    100% {
+        color: inherit;
+    }
+}
+
+@keyframes blackToWhite {
+    0% {
+        color: #000;
+        text-shadow: none;
+    }
+    100% {
+        color: #fff;
+        text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    }
+}
+
+@keyframes whiteToBlack {
+    0% {
+        color: #fff;
+        text-shadow: none;
+    }
+    100% {
+        color: #000;
+        text-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+}
+
+/* Media query for very small screens */
+@media (max-width: 360px) {
+    .title-animate-2 {
+        font-size: 2rem;
+        letter-spacing: 0.15em;
+    }
+    
+    .date-title {
+        font-size: 1.6rem;
+    }
+    
+    .date-content {
+        font-size: 0.95rem;
+    }
+    
+    .quote-1, .quote-2, .quote-3 {
+        font-size: 1.1rem;
+    }
+    
+    .quote-line {
+        font-size: 1.05rem;
+    }
+    
+    .continue-btn-2 {
+        padding: 14px 28px;
+        font-size: 1rem;
+        min-width: 180px;
+    }
+}
+</style>
+
+<div class="scene-goen-2">
+    <!-- Left side - WHITE background -->
+    <div class="scene-left-2" id="left-side-2">
+        <!-- January 14 text - BLACK TEXT on WHITE BACKGROUND -->
+        <div class="date-text january-text hidden" id="january-text">
+            <div class="date-title">January 14</div>
+            <div class="date-content">
+                This day signals the Sun's return northward.<br>
+                In India, it is Makar Sankranti—<br>
+                the moment light begins to win over darkness.<br>
+                A day of renewal, movement, and beginnings. 
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right side - BLACK background -->
+    <div class="scene-right-2" id="right-side-2">
+        <!-- November 1 text - WHITE TEXT on BLACK BACKGROUND -->
+        <div class="date-text november-text hidden" id="november-text">
+            <div class="date-title">November 1</div>
+            <div class="date-content">
+                Across ancient Europe, this day marked Samhain , the sun sleeps<br>
+                the end of the harvest, the thinning of the veil between worlds.<br>
+                a time to reflect, release, and remember.<br>
+                The old year was considered complete.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Center overlay content -->
+    <div class="scene-content-2">
+        <!-- Title -->
+        <h1 class="title-animate-2" id="main-title-2">Moments Carved in History</h1>
+        
+        <!-- Quote 1 - Split black/white theme -->
+        <div class="quote-container quote-1-container hidden" id="quote-1">
+            <div class="quote-1">
+                <span class="quote-line" id="line-1">History tells the same story twice:</span>
+                <span class="quote-line" id="line-2">First, we let go.</span>
+                <span class="quote-line" id="line-3">Then, we begin again.</span>
+            </div>
+        </div>
+        
+        <!-- Quote 2 - Black background, white text -->
+        <div class="quote-container quote-2-container hidden" id="quote-2">
+            <div class="quote-2">
+                Some connections are not made suddenly.<br>
+                They are carried through seasons.
+            </div>
+        </div>
+        
+        <!-- Quote 3 - White background, black text -->
+        <div class="quote-container quote-3-container hidden" id="quote-3">
+            <div class="quote-3">
+                Between November 1 and January 14,<br>
+                time pauses—<br>
+                and fate prepares what comes next.
+                
+            </div>
+        </div>
+        
+        <!-- Continue button -->
+        <button class="continue-btn-2" id="continue-btn-2">CONTINUE</button>
+    </div>
+</div>
+
+<script>
+let currentStep = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const continueBtn = document.getElementById('continue-btn-2');
+    const mainTitle = document.getElementById('main-title-2');
+    
+    // Set up click handler
+    continueBtn.addEventListener('click', handleContinueClick);
+    
+    // Initial step - show title
+    setTimeout(() => {
+        mainTitle.style.animation = 'titleSlideIn 1.8s ease-out forwards';
+        currentStep = 1;
+    }, 500);
+});
+
+function handleContinueClick() {
+    nextStep();
+}
+
+function nextStep() {
+    const mainTitle = document.getElementById('main-title-2');
+    
+    switch(currentStep) {
+        case 1:
+            // First click: Remove "Moments Carved in History"
+            mainTitle.style.animation = 'fadeOut 1s ease-out forwards';
+            setTimeout(() => {
+                mainTitle.style.display = 'none';
+            }, 1000);
+            break;
+            
+        case 2:
+            // Show November text on black side - WHITE TEXT ON BLACK
+            showElement('november-text', 'fadeInUp', 0.5);
+            break;
+            
+        case 3:
+            // Show January text on white side - BLACK TEXT ON WHITE
+            showElement('january-text', 'fadeInUp', 0.5);
+            break;
+            
+        case 4:
+            // Hide date texts, show quote 1
+            hideElement('november-text');
+            hideElement('january-text');
+            setTimeout(() => {
+                showQuote1();
+            }, 800);
+            break;
+            
+        case 5:
+            // Animate quote 1 lines with black/white animation
+            animateQuoteLines();
+            break;
+            
+        case 6:
+            // Hide quote 1, show quote 2 (black background, white text)
+            hideElement('quote-1');
+            setTimeout(() => {
+                showElement('quote-2', 'fadeIn', 0.5);
+            }, 800);
+            break;
+            
+        case 7:
+            // Fade out quote 2, show quote 3 (white background, black text)
+            hideElement('quote-2');
+            setTimeout(() => {
+                showElement('quote-3', 'fadeIn', 0.5);
+            }, 800);
+            break;
+            
+        case 8:
+            // Final transition - white takes over
+            finalTransition();
+            break;
+    }
+    
+    currentStep++;
+}
+
+function showElement(elementId, animation, delay = 0) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        setTimeout(() => {
+            element.classList.remove('hidden');
+            element.style.animation = `${animation} 1.2s ease-out forwards`;
+        }, delay * 1000);
+    }
+}
+
+function hideElement(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.animation = 'fadeOut 0.8s ease-out forwards';
+        setTimeout(() => {
+            element.classList.add('hidden');
+        }, 800);
+    }
+}
+
+function showQuote1() {
+    const quote1 = document.getElementById('quote-1');
+    quote1.classList.remove('hidden');
+    quote1.style.animation = 'fadeIn 0.8s ease-out forwards';
+}
+
+function animateQuoteLines() {
+    const lines = document.querySelectorAll('.quote-line');
+    lines.forEach((line, index) => {
+        setTimeout(() => {
+            // First fade in
+            line.style.animation = `quoteLineFadeIn 1s ease-out forwards`;
+            line.style.opacity = '1';
+            line.style.transform = 'translateY(0)';
+            
+            // Then apply black/white transition animation
+            setTimeout(() => {
+                if (index === 0) {
+                    // First line: split black/white animation
+                    line.style.animation = `textSplitAnimation 2.5s ease-out forwards`;
+                } else if (index === 1) {
+                    // Second line: black to white
+                    line.style.animation = `blackToWhite 2.5s ease-out forwards`;
+                } else {
+                    // Third line: white to black
+                    line.style.animation = `whiteToBlack 2.5s ease-out forwards`;
+                }
+            }, 1000);
+        }, index * 700); // Reduced delay for mobile
+    });
+}
+
+function finalTransition() {
+    const continueBtn = document.getElementById('continue-btn-2');
+    const leftSide = document.getElementById('left-side-2');
+    const rightSide = document.getElementById('right-side-2');
+    const quote3 = document.getElementById('quote-3');
+    
+    // Fade out quote 3
+    hideElement('quote-3');
+    
+    // Remove old event listener
+    continueBtn.removeEventListener('click', handleContinueClick);
+    
+    // Transition background to all white
+    setTimeout(() => {
+        // White slides right, black slides left
+        
+        rightSide.style.background = 'white';
+        rightSide.style.transform = 'translateX(-70%)';
+        
+        // After transition, reset positions and make all white
+        setTimeout(() => {
+            leftSide.style.display = 'none';
+            rightSide.style.width = '100%';
+            rightSide.style.transform = 'translateX(0)';
+            rightSide.style.background = 'white';
+            
+            // Update continue button for next scene
+            setTimeout(() => {
+                continueBtn.style.animation = 'fadeIn 0.8s ease-out forwards';
+                continueBtn.style.opacity = '1';
+                continueBtn.textContent = 'NEXT →';
+                continueBtn.style.background = 'white';
+                continueBtn.style.color = 'black';
+                continueBtn.style.border = '2px solid black';
+                continueBtn.classList.add('next-btn-final');
+                
+                // Remove old click handler and add direct scene 3 redirect
+                continueBtn.removeEventListener('click', handleContinueClick);
+                continueBtn.onclick = function() {
+                    window.location.href = "/scene/3";
+                };
+                
+                // Update current step
+                currentStep = 9;
+            }, 800);
+        }, 1800); // Reduced transition time
+    }, 800);
+}
+</script>
+
+{% endblock %}

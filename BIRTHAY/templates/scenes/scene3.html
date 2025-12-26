@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Sofia:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* Scene 3 specific styles - Mobile Portrait Optimized */
+.scene-goen-3 {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Cinzel', serif;
+    background: white; /* White background */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: background 2s ease;
+}
+
+/* Fire background effect */
+.fire-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(0deg, 
+        rgba(255,255,255,1) 0%,
+        rgba(255,255,255,0.8) 20%,
+        rgba(255,255,255,0.6) 40%,
+        rgba(255,69,0,0.4) 60%,
+        rgba(255,0,0,0.3) 80%,
+        rgba(255, 0, 230, 0.2) 100%
+    );
+    opacity: 0.7;
+    z-index: 1;
+    animation: fireFlicker 3s infinite alternate;
+}
+
+@keyframes fireFlicker {
+    0%, 100% {
+        opacity: 0.6;
+        background-position: 0% 0%;
+    }
+    25% {
+        opacity: 0.7;
+        background-position: 10% 10%;
+    }
+    50% {
+        opacity: 0.8;
+        background-position: -10% -10%;
+    }
+    75% {
+        opacity: 0.7;
+        background-position: 5% 5%;
+    }
+}
+
+/* Title with animation - Using Orbitron font for futuristic look */
+.title-animate-3 {
+    font-size: 2.8rem;
+    letter-spacing: 0.15em;
+    margin: 0 0 15px 0;
+    font-weight: 900;
+    line-height: 1.2;
+    text-align: center;
+    color: rgb(0, 0, 51); /* Deep blue text */
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: titleSlideIn 2s ease-out 0.5s forwards;
+    padding: 0 10px;
+    font-family: 'Sofia', sans-serif;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 2;
+}
+
+/* Add glow effect to title */
+.title-animate-3::after {
+    content: 'CONVEYING STARS';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: rgba(255, 69, 0, 0.3);
+    z-index: -1;
+    animation: textGlow 2s infinite alternate;
+}
+
+@keyframes textGlow {
+    0% {
+        text-shadow: 0 0 10px rgba(255, 69, 0, 0.3),
+                     0 0 20px rgba(255, 69, 0, 0.2),
+                     0 0 30px rgba(255, 69, 0, 0.1);
+        opacity: 0.5;
+    }
+    100% {
+        text-shadow: 0 0 15px rgba(255, 69, 0, 0.5),
+                     0 0 25px rgba(255, 69, 0, 0.4),
+                     0 0 35px rgba(255, 69, 0, 0.3);
+        opacity: 0.8;
+    }
+}
+
+/* Subtitle styling */
+.subtitle-3 {
+    font-size: 1.4rem;
+    color: rgb(0, 0, 51); /* Deep blue text */
+    font-style: italic;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeIn 1.5s ease-out 1.5s forwards;
+    line-height: 1.4;
+    padding: 0 15px;
+    position: relative;
+    z-index: 2;
+    font-weight: 400;
+}
+
+/* Text content styling */
+.content-text {
+    max-width: 90%;
+    margin: 20px auto;
+    color: rgb(0, 0, 51); /* Deep blue text */
+    font-size: 1.3rem;
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: textSlideIn 1.5s ease-out forwards;
+    position: relative;
+    z-index: 2;
+    font-weight: 500;
+}
+
+/* Zodiac Background Container - Covers entire screen */
+.zodiac-bg-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.zodiac-bg-image {
+    width: 100%;
+    max-width: 1000px;
+    height: auto;
+    opacity: 1; /* Very subtle when first shown */
+   
+    transition: all 3s ease;
+    object-fit: contain;
+}
+
+.zodiac-bg-image.visible {
+    opacity: 0.2;
+    animation: gentlePulse 4s infinite ease-in-out;
+}
+
+.zodiac-bg-image.zooming {
+    animation: massiveZoom 3s ease-out forwards;
+}
+
+/* Zodiac description */
+.zodiac-desc {
+    max-width: 85%;
+    margin: 20px auto;
+    color: rgb(0, 0, 51); /* Deep blue text */
+    font-size: 1.1rem;
+    line-height: 1.5;
+    opacity: 0;
+    font-style: italic;
+    position: relative;
+    z-index: 2;
+}
+
+.zodiac-desc.visible {
+    opacity: 1;
+    animation: fadeIn 2s ease-out forwards;
+}
+
+/* NEXT button styling - Same as Scene 2 */
+.next-btn-3 {
+    margin-top: 30px;
+    padding: 14px 28px;
+    min-width: 180px;
+    
+    background: white;
+    border: 2px solid black;
+    color: black;
+    
+    text-decoration: none;
+    letter-spacing: 0.25em;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s ease;
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.next-btn-3:hover, .next-btn-3:active {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    background: #f0f0f0;
+}
+
+/* Final next button style */
+.next-btn-final {
+    background: white !important;
+    color: black !important;
+    border: 2px solid black !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.next-btn-final:hover, .next-btn-final:active {
+    background: #f0f0f0 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Hide elements initially */
+.hidden {
+    display: none;
+    opacity: 0;
+}
+
+/* Animations */
+@keyframes titleSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes textSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes gentlePulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.2;
+    }
+    50% {
+        transform: scale(1.02);
+        opacity: 0.25;
+    }
+}
+
+@keyframes massiveZoom {
+    0% {
+        transform: scale(1);
+        opacity: 0.2;
+        filter: brightness(0);
+    }
+    50% {
+        opacity: 0.7;
+        filter: brightness(100) contrast(100) invert(1);
+    }
+    100% {
+        transform: scale(50);
+        opacity: 0; /* Fade to transparent */
+        filter: brightness(100) contrast(100) invert(1);
+    }
+}
+
+/* Media query for very small screens */
+@media (max-width: 360px) {
+    .title-animate-3 {
+        font-size: 2.2rem;
+        letter-spacing: 0.1em;
+    }
+    
+    .subtitle-3 {
+        font-size: 1.2rem;
+    }
+    
+    .content-text {
+        font-size: 1.1rem;
+    }
+    
+    .zodiac-bg-image {
+        width: 70%;
+        max-width: 250px;
+    }
+    
+    .zodiac-desc {
+        font-size: 2.5rem;
+        text-size-adjust: 2.5rem;
+    }
+    
+    .next-btn-3 {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+        min-width: 160px;
+    }
+}
+</style>
+
+<div class="scene-goen-3" id="scene-container">
+    <!-- Fire background effect -->
+    <div class="fire-background"></div>
+    
+    <!-- Zodiac Background Container (covers entire screen) -->
+    <div class="zodiac-bg-container hidden" id="zodiac-bg-container">
+        <img src="{{ url_for('static', filename='images/capricon.png') }}" 
+             class="zodiac-bg-image" 
+             id="zodiac-bg-image"
+             alt="Capricorn Zodiac Sign">
+    </div>
+    
+    <!-- Main Title -->
+    <h1 class="title-animate-3" id="main-title-3">CONVEYING STARS</h1>
+    
+    <!-- Subtitle -->
+    <div class="subtitle-3" id="subtitle-3">"star, star tell me who i am"</div>
+    
+    <!-- Text Content 1 -->
+    <div class="content-text hidden" id="text-1">
+        Winter's steady will.<br>
+        Capricorn walks the long road,<br>
+        unseen, unbroken.
+    </div>
+    
+    <!-- Zodiac Description -->
+    <div class="zodiac-desc hidden" id="zodiac-desc">
+        CAPRICON : <br>
+        "focused, disciplined, and goal-oriented,<br>
+        with a strong sense of responsibility<br>
+        and long-term vision" <br>
+        -so did goggle said
+    </div>
+    
+    <!-- NEXT Button - Same as Scene 2 -->
+    <button class="next-btn-3" id="next-btn-3">NEXT →</button>
+</div>
+
+<script>
+let currentStep = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const nextBtn = document.getElementById('next-btn-3');
+    const mainTitle = document.getElementById('main-title-3');
+    const subtitle = document.getElementById('subtitle-3');
+    
+    // Set up click handler
+    nextBtn.addEventListener('click', handleNextClick);
+    
+    // Initial step - show title and subtitle
+    setTimeout(() => {
+        mainTitle.style.animation = 'titleSlideIn 2s ease-out forwards';
+        
+        setTimeout(() => {
+            subtitle.style.animation = 'fadeIn 1.5s ease-out forwards';
+            currentStep = 1;
+        }, 1500);
+    }, 500);
+});
+
+function handleNextClick() {
+    nextStep();
+}
+
+function nextStep() {
+    const nextBtn = document.getElementById('next-btn-3');
+    
+    switch(currentStep) {
+        case 1:
+            // First click: Show first text
+            showElement('text-1', 'textSlideIn', 0.5);
+            break;
+            
+        case 2:
+            // Second click: Hide all text, show zodiac as background
+            hideAllText();
+            setTimeout(() => {
+                showZodiacBackground();
+            }, 1000);
+            break;
+            
+        case 3:
+            // Third click: Show zodiac description
+            showElement('zodiac-desc', null, 0.5);
+            const zodiacDesc = document.getElementById('zodiac-desc');
+            zodiacDesc.classList.add('visible');
+            break;
+            
+        case 4:
+            // Fourth click: MASSIVE ZOOM into zodiac background and transition to black
+            startMassiveZoomTransition();
+            break;
+            
+        case 5:
+            // Fifth click: Go to next scene
+            window.location.href = "/scene/4";
+            break;
+    }
+    
+    currentStep++;
+}
+
+function showElement(elementId, animation, delay = 0) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        setTimeout(() => {
+            element.classList.remove('hidden');
+            if (animation) {
+                element.style.animation = `${animation} 1.5s ease-out forwards`;
+            }
+        }, delay * 1000);
+    }
+}
+
+function hideElement(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.style.animation = 'fadeOut 0.8s ease-out forwards';
+        setTimeout(() => {
+            element.classList.add('hidden');
+        }, 800);
+    }
+}
+
+function hideAllText() {
+    // Hide all text elements
+    hideElement('main-title-3');
+    hideElement('subtitle-3');
+    hideElement('text-1');
+    
+    // Also hide fire background
+    const fireBg = document.querySelector('.fire-background');
+    if (fireBg) {
+        fireBg.style.animation = 'fadeOut 0.8s ease-out forwards';
+        setTimeout(() => {
+            fireBg.style.display = 'none';
+        }, 800);
+    }
+}
+
+function showZodiacBackground() {
+    const zodiacContainer = document.getElementById('zodiac-bg-container');
+    const zodiacImage = document.getElementById('zodiac-bg-image');
+    
+    zodiacContainer.classList.remove('hidden');
+    setTimeout(() => {
+        zodiacContainer.style.opacity = '1';
+        zodiacImage.classList.add('visible');
+    }, 100);
+}
+
+function startMassiveZoomTransition() {
+    const nextBtn = document.getElementById('next-btn-3');
+    const sceneContainer = document.getElementById('scene-container');
+    const zodiacImage = document.getElementById('zodiac-bg-image');
+    const zodiacDesc = document.getElementById('zodiac-desc');
+    const zodiacContainer = document.getElementById('zodiac-bg-container');
+    
+    // Remove old event listener
+    nextBtn.removeEventListener('click', handleNextClick);
+    
+    // Hide zodiac description
+    zodiacDesc.style.animation = 'fadeOut 0.8s ease-out forwards';
+    
+    // Fade out next button temporarily
+    nextBtn.style.animation = 'fadeOut 0.5s ease-out forwards';
+    
+    setTimeout(() => {
+        // Start background transition to black
+        sceneContainer.style.background = 'rgb(0, 0, 0)';
+        
+        // Start MASSIVE ZOOM animation
+        zodiacImage.classList.remove('visible');
+        zodiacImage.classList.add('zooming');
+        
+        // Wait for massive zoom to complete
+        setTimeout(() => {
+            // Hide the zodiac image completely (it fades to transparent)
+            zodiacImage.style.display = 'none';
+            zodiacContainer.style.display = 'none';
+            
+            // Show final next button
+            nextBtn.style.animation = 'fadeIn 1s ease-out forwards';
+            nextBtn.style.opacity = '1';
+            nextBtn.textContent = 'NEXT →';
+            nextBtn.classList.add('next-btn-final');
+            
+            // Add direct scene 4 redirect
+            nextBtn.onclick = function() {
+                window.location.href = "/scene/4";
+            };
+            
+            // Update current step
+            currentStep = 5;
+        }, 3000); // Wait for 3 second zoom animation
+    }, 800);
+}
+</script>
+
+{% endblock %}

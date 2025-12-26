@@ -1,0 +1,673 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* Scene 9 — Aesthetic Humor Blackout */
+.scene-9 {
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    position: relative;
+    color: white;
+}
+
+/* Animated background particles */
+.particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 15s infinite linear;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-1000px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Glitch effect */
+.glitch {
+    position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+}
+
+.glitch::before {
+    animation: glitch-anim 0.3s infinite;
+    color: #ff00ff;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+}
+
+.glitch::after {
+    animation: glitch-anim2 0.3s infinite;
+    color: #00ffff;
+    clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+}
+
+@keyframes glitch-anim {
+    0% {
+        transform: translate(0);
+    }
+    20% {
+        transform: translate(-2px, 2px);
+    }
+    40% {
+        transform: translate(-2px, -2px);
+    }
+    60% {
+        transform: translate(2px, 2px);
+    }
+    80% {
+        transform: translate(2px, -2px);
+    }
+    100% {
+        transform: translate(0);
+    }
+}
+
+@keyframes glitch-anim2 {
+    0% {
+        transform: translate(0);
+    }
+    20% {
+        transform: translate(2px, -2px);
+    }
+    40% {
+        transform: translate(2px, 2px);
+    }
+    60% {
+        transform: translate(-2px, -2px);
+    }
+    80% {
+        transform: translate(-2px, 2px);
+    }
+    100% {
+        transform: translate(0);
+    }
+}
+
+/* Main text container */
+.scene9-text {
+    text-align: center;
+    font-size: 1.8rem;
+    line-height: 2.2;
+    opacity: 0;
+    transition: opacity 1s ease;
+    z-index: 2;
+    text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.3),
+        0 0 20px rgba(255, 255, 255, 0.2);
+    max-width: 800px;
+    padding: 40px;
+    background: rgba(10, 10, 10, 0.7);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+/* Glowing text effects */
+.glow-text {
+    color: #fff;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 15px #ff00de,
+        0 0 20px #ff00de,
+        0 0 25px #ff00de;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 15px #ff00de,
+            0 0 20px #ff00de,
+            0 0 25px #ff00de;
+    }
+    to {
+        text-shadow: 
+            0 0 10px #fff,
+            0 0 20px #ff00de,
+            0 0 30px #ff00de,
+            0 0 40px #ff00de,
+            0 0 50px #ff00de;
+    }
+}
+
+/* Funny emphasis */
+.wiggle {
+    display: inline-block;
+    animation: wiggle 0.8s ease-in-out infinite;
+    color: #00ffff;
+    font-weight: bold;
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(-2deg) scale(1); }
+    25% { transform: rotate(4deg) scale(1.05); }
+    50% { transform: rotate(-4deg) scale(1.05); }
+    75% { transform: rotate(2deg) scale(1.05); }
+}
+
+/* Cursor */
+.cursor {
+    display: inline-block;
+    margin-left: 4px;
+    animation: blink 1s infinite, cursorGlow 2s infinite;
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+@keyframes cursorGlow {
+    0%, 100% { 
+        text-shadow: 0 0 10px #00ff00;
+    }
+    50% { 
+        text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00;
+    }
+}
+
+/* NEXT button */
+.scene9-btn {
+    margin-top: 40px;
+    padding: 15px 50px;
+    background: linear-gradient(45deg, 
+        rgba(255, 0, 222, 0.2), 
+        rgba(0, 255, 255, 0.2));
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.5s ease;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+    backdrop-filter: blur(5px);
+}
+
+.scene9-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent);
+    transition: 0.6s;
+}
+
+.scene9-btn:hover::before {
+    left: 100%;
+}
+
+.scene9-btn.visible {
+    opacity: 1;
+}
+
+.scene9-btn:hover {
+    opacity: 1;
+    transform: translateY(-3px);
+    box-shadow: 
+        0 5px 20px rgba(255, 0, 222, 0.4),
+        0 0 30px rgba(0, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+    background: linear-gradient(45deg, 
+        rgba(255, 0, 222, 0.3), 
+        rgba(0, 255, 255, 0.3));
+}
+
+/* Ripple effect */
+.ripple {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: ripple 2s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    from {
+        width: 20px;
+        height: 20px;
+        opacity: 0.8;
+    }
+    to {
+        width: 500px;
+        height: 500px;
+        opacity: 0;
+    }
+}
+
+/* Scan line effect */
+.scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(0, 255, 0, 0.7), 
+        transparent);
+    top: 0;
+    animation: scan 3s linear infinite;
+    z-index: 1;
+    opacity: 0.7;
+}
+
+@keyframes scan {
+    0% {
+        top: 0;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+/* Terminal-style lines */
+.terminal-line {
+    display: inline-block;
+    opacity: 0;
+    animation: terminalAppear 0.5s forwards;
+}
+
+@keyframes terminalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tiny joke footer */
+.footer-joke {
+    position: absolute;
+    bottom: 30px;
+    font-size: 0.9rem;
+    opacity: 0;
+    color: rgba(255, 255, 255, 0.3);
+    transition: opacity 1s ease;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    width: 100%;
+    letter-spacing: 1px;
+}
+.footer-joke.visible {
+    opacity: 0.6;
+}
+
+.footer-joke:hover {
+    opacity: 1;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Progress bar for typing */
+.progress-container {
+    position: absolute;
+    bottom: 80px;
+    width: 300px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff00de, #00ffff);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* Typewriter sound effect indicator */
+.type-sound {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.2);
+    animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.6; }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .scene9-text {
+        font-size: 1.4rem;
+        line-height: 1.8;
+        padding: 25px;
+        margin: 20px;
+    }
+    
+    .scene9-btn {
+        padding: 12px 35px;
+        font-size: 1.1rem;
+        margin-top: 30px;
+    }
+    
+    .wiggle {
+        animation: wiggle 0.6s ease-in-out infinite;
+    }
+}
+
+@media (max-width: 480px) {
+    .scene9-text {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        padding: 20px;
+    }
+    
+    .scene9-btn {
+        padding: 10px 30px;
+        font-size: 1rem;
+    }
+    
+    .footer-joke {
+        font-size: 0.8rem;
+        bottom: 20px;
+    }
+}
+</style>
+
+<div class="scene-9" id="scene9">
+    <!-- Scan line effect -->
+    <div class="scan-line"></div>
+    
+    <!-- Animated particles -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Progress bar -->
+    <div class="progress-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    
+    <!-- Typewriter sound indicator -->
+    <div class="type-sound">⌨︎ typing...</div>
+    
+    <!-- Main text container -->
+    <div class="scene9-text" id="scene9-text">
+        <span id="typed"></span><span class="cursor">█</span>
+        <br><br>
+        <button class="scene9-btn" id="scene9-next">[ NEXT ]</button>
+    </div>
+
+    <!-- Footer joke -->
+    <div class="footer-joke" id="footer-joke">
+        // this message was handcrafted • no refunds • made with ⌨︎
+    </div>
+</div>
+
+<script>
+// Enhanced text content
+const phase1 = [
+    "╭────────────────────────────────╮",
+    "│  wish u a happy wala birthday  │",
+    "╰────────────────────────────────╯",
+    "",
+    "⚡ i mean—",
+    "❓ without me how?",
+    "",
+    "LOL",
+    "",
+    "🌀 but still...",
+    "🎁 take it!"
+];
+
+const phase2 = [
+    "╔══════════════════════════╗",
+    "║      FEEDBACK!!!!        ║",
+    "╚══════════════════════════╝",
+    "",
+    " okay,",
+    " nalukawnu,",
+    "",
+    " emotional damage: processed ✔",
+    "",
+    "⏳ till then...",
+    "",
+    "PEACE ✌"
+];
+
+// DOM elements
+const typedEl = document.getElementById("typed");
+const container = document.getElementById("scene9-text");
+const nextBtn = document.getElementById("scene9-next");
+const footerJoke = document.getElementById("footer-joke");
+const progressContainer = document.getElementById("progress-container");
+const progressBar = document.getElementById("progress-bar");
+const particlesContainer = document.getElementById("particles");
+
+// Typing variables
+let lineIndex = 0;
+let charIndex = 0;
+let currentPhase = phase1;
+let isTyping = true;
+
+// Create particles
+function createParticles() {
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Random properties
+        const size = Math.random() * 3 + 1;
+        const left = Math.random() * 100;
+        const delay = Math.random() * 15;
+        const duration = Math.random() * 10 + 10;
+        
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${left}vw`;
+        particle.style.top = '100vh';
+        particle.style.animationDelay = `${delay}s`;
+        particle.style.animationDuration = `${duration}s`;
+        
+        particlesContainer.appendChild(particle);
+    }
+}
+
+// Update progress bar
+function updateProgress() {
+    if (currentPhase === phase1) {
+        const progress = (lineIndex / phase1.length) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+}
+
+// Typewriter function
+function typeNextChar() {
+    if (!isTyping) return;
+    
+    if (lineIndex >= currentPhase.length) {
+        // Phase complete
+        if (currentPhase === phase1) {
+            // Show progress bar and ripple
+            progressContainer.style.opacity = '1';
+            progressBar.style.width = '100%';
+            
+            setTimeout(() => {
+                ripple();
+                nextBtn.classList.add("visible");
+                footerJoke.classList.add("visible");
+                progressContainer.style.opacity = '0';
+            }, 50);
+        } else {
+            // End of phase 2 - redirect
+            setTimeout(() => {
+                window.location.href = "/scene/10";
+            }, 1500);
+        }
+        return;
+    }
+
+    const line = currentPhase[lineIndex];
+
+    if (charIndex < line.length) {
+        typedEl.innerHTML += line.charAt(charIndex++);
+        updateProgress();
+        
+        // Add typing sound effect class to cursor
+        const cursor = document.querySelector('.cursor');
+        cursor.classList.add('typing');
+        setTimeout(() => cursor.classList.remove('typing'), 50);
+        
+        setTimeout(typeNextChar, charIndex % 3 === 0 ? 45 : 30); // Variable speed
+    } else {
+        typedEl.innerHTML += "<br>";
+        charIndex = 0;
+        lineIndex++;
+        updateProgress();
+        
+        // Different delays based on line type
+        let delay = 300;
+        if (currentPhase[lineIndex] && currentPhase[lineIndex].includes('──')) delay = 200;
+        if (currentPhase[lineIndex] === '') delay = 400;
+        
+        setTimeout(typeNextChar, delay);
+    }
+}
+
+// Ripple effect
+function ripple() {
+    const r = document.createElement("div");
+    r.className = "ripple";
+    document.body.appendChild(r);
+    r.style.left = "50%";
+    r.style.top = "50%";
+    r.style.transform = "translate(-50%, -50%)";
+    setTimeout(() => r.remove(), 2000);
+}
+
+// Glitch effect for specific elements
+function addGlitchEffect() {
+    const glitchElements = document.querySelectorAll('.glitch');
+    glitchElements.forEach(el => {
+        el.dataset.text = el.textContent;
+        setInterval(() => {
+            el.style.animation = 'none';
+            setTimeout(() => {
+                el.style.animation = '';
+            }, 50);
+        }, 3000);
+    });
+}
+
+// Next button handler
+nextBtn.onclick = () => {
+    isTyping = false; // Stop current typing
+    setTimeout(() => {
+        // Reset for phase 2
+        typedEl.innerHTML = "";
+        nextBtn.style.display = "none";
+        footerJoke.classList.remove("visible");
+        currentPhase = phase2;
+        lineIndex = 0;
+        charIndex = 0;
+        isTyping = true;
+        
+        // Reset progress bar
+        progressBar.style.width = '0%';
+        progressContainer.style.opacity = '1';
+        
+        // Start typing phase 2
+        setTimeout(typeNextChar, 500);
+    }, 300);
+};
+
+// Initialize scene
+document.addEventListener("DOMContentLoaded", () => {
+    // Create background particles
+    createParticles();
+    
+    // Show main container
+    container.style.opacity = "1";
+    
+    // Show progress container
+    progressContainer.style.opacity = '1';
+    
+    // Start typing
+    setTimeout(() => {
+        typeNextChar();
+        addGlitchEffect();
+    }, 1000);
+    
+    // Add click ripple effect
+    document.addEventListener('click', (e) => {
+        if (e.target !== nextBtn) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            document.body.appendChild(ripple);
+            ripple.style.left = `${e.clientX}px`;
+            ripple.style.top = `${e.clientY}px`;
+            setTimeout(() => ripple.remove(), 2000);
+        }
+    });
+});
+</script>
+
+{% endblock %}
